@@ -22,7 +22,7 @@ export default function ProductForm() {
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
-  const [deadline, setDeadline] = useState("");
+  // const [deadline, setDeadline] = useState("");
   const [showCategorySelect, setShowCategorySelect] = useState(false);
   const [showProductNameInput, setShowProductNameInput] = useState(false);
   const [productName, setProductName] = useState("");
@@ -139,7 +139,7 @@ export default function ProductForm() {
           <input
             type="text"
             placeholder="공통적으로 쓰이는 제품명을 적어주세요!"
-            className="w-full focus:border-blue-500 bg-transparent border-b border-gray-600 py-2 text-2xl font-semibold outline-none mb-2 focus:border-blue-500 transition-colors duration-200"
+            className="w-full focus:border-blue-500 bg-transparent border-b border-gray-600 py-2 text-2xl font-semibold outline-none mb-2 transition-colors duration-200"
             value={productName}
             onChange={(e) => setProductName(e.target.value)}
           />
