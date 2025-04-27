@@ -1,17 +1,16 @@
 import { useRef } from "react";
 import { Outlet, useLocation } from "react-router-dom";
+import BottomNav from "../components/BottomNav";
 
 function Layout() {
   const location = useLocation();
   // "/game"로 변경해주어야 올바르게 비교됨
   const showNav =
-    location.pathname === "/login" ||
-    location.pathname === "/main" ||
-    location.pathname === "/game";
+    location.pathname === "/login" || location.pathname === "/home";
 
   const renderBottmNav = () => {
     if (showNav) {
-      return <div>하단 네비게이션</div>;
+      return <BottomNav />;
     } else {
       return null;
     }
@@ -24,7 +23,7 @@ function Layout() {
       ref={scrollContainerRef}
       className="relative border border-black max-w-[760px] min-w-[320px] w-full h-screen mx-auto flex flex-col overflow-y-auto"
     >
-      <div className="flex-1 flex justify-center w-full px-3">
+      <div className="flex-1 flex justify-center w-full ">
         <Outlet />
       </div>
       {renderBottmNav()}
