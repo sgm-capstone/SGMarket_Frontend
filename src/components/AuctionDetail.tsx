@@ -6,6 +6,7 @@ import {
   FaHeart,
   FaChartLine,
 } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const bidHistory = [
   { date: "25.03.19", price: "105,000,000", user: "데일리 백수" },
@@ -16,13 +17,13 @@ const bidHistory = [
 export default function AuctionDetail() {
   const [tab, setTab] = useState("상세정보");
   const [bidTab, setBidTab] = useState("입찰 내역");
-
+  const navigate = useNavigate();
   return (
     <div className="bg-[#101010] text-white w-full max-w-[760px] mx-auto min-h-screen pb-20">
       {/* 헤더 */}
       <div className="flex items-center justify-center relative h-[50px] border-b border-gray-700">
         <button className="absolute left-4 text-xl text-white">
-          <FaChevronLeft />
+          <FaChevronLeft onClick={() => navigate(-1)} />
         </button>
         <h1 className="text-lg font-bold">경매</h1>
       </div>

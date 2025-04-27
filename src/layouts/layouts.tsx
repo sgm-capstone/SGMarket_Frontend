@@ -4,9 +4,7 @@ import BottomNav from "../components/BottomNav";
 
 function Layout() {
   const location = useLocation();
-  // "/game"로 변경해주어야 올바르게 비교됨
-  const showNav =
-    location.pathname === "/login" || location.pathname === "/home";
+  const showNav = location.pathname === "/home";
 
   const renderBottmNav = () => {
     if (showNav) {

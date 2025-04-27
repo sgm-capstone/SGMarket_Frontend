@@ -2,6 +2,7 @@ import { useState } from "react";
 import Product from "../components/mainPage/Product";
 import { FaBell, FaChevronLeft, FaPlus } from "react-icons/fa";
 import TopHeader from "../components/TopHeader";
+import { useNavigate } from "react-router-dom";
 
 const categories = ["전체", "패션", "전자/IT", "책", "중고차"];
 
@@ -72,9 +73,9 @@ const sampleProducts = [
 ];
 
 export default function MainPage() {
-  const [currentRegion, setCurrentRegion] = useState("석수1동");
+  // const [currentRegion, setCurrentRegion] = useState("석수1동");
   const [selectedCategory, setSelectedCategory] = useState("전체");
-
+  const navigate = useNavigate();
   return (
     <div className="w-full  mx-auto bg-[#101012] text-white px-4 py-3 pb-[100px]">
       <TopHeader currentRegion="석수1동" />
@@ -95,13 +96,19 @@ export default function MainPage() {
         ))}
       </div>
 
-      <div className="flex flex-col h-[20%] gap-2">
+      <div
+        className="flex flex-col h-[20%] gap-2"
+        onClick={() => navigate("/auction")}
+      >
         {sampleProducts.map((p, idx) => (
           <Product key={idx} {...p} />
         ))}
       </div>
 
-      <div className="fixed bottom-[90px] right-0 left-0 mx-auto max-w-[760px] w-full flex justify-end pr-6 pointer-events-none">
+      <div
+        className="fixed bottom-[90px] right-0 left-0 mx-auto max-w-[760px] w-full flex justify-end pr-6 pointer-events-none"
+        onClick={() => navigate("/create")}
+      >
         <div className="pointer-events-auto bg-white text-black p-4 rounded-full shadow-lg">
           <FaPlus />
         </div>
