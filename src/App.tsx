@@ -7,6 +7,7 @@ import ProductForm from "./components/productForm/ProductForm";
 import AuctionDetail from "./components/AuctionDetail";
 import PrivateRoute from "./routes/PrivateRoute";
 import PublicRoute from "./routes/PublicRoute";
+import RegisterUser from "./pages/singup/RegisterUser";
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
           <Route path="home" element={<Home />} />
           <Route path="create" element={<ProductForm />} />
           <Route path="auction" element={<AuctionDetail />} />
+          <Route path="register" element={<RegisterUser />} />
         </Route>
       </Route>
     </Routes>
