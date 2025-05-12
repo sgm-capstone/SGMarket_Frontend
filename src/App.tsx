@@ -10,6 +10,8 @@ import PublicRoute from "./routes/PublicRoute";
 import { useEffect } from "react";
 import axiosInstance from "./api/axios";
 import { useAuthStore } from "./stores/authStore";
+import RegisterUser from "./pages/singup/RegisterUser";
+
 
 export default function App() {
   const ChangeRecentToken = async () => {
@@ -37,6 +39,7 @@ export default function App() {
           <Route path="home" element={<Home />} />
           <Route path="create" element={<ProductForm />} />
           <Route path="auction" element={<AuctionDetail />} />
+          <Route path="register" element={<RegisterUser />} />
         </Route>
       </Route>
     </Routes>
