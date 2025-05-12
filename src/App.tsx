@@ -7,8 +7,24 @@ import ProductForm from "./components/productForm/ProductForm";
 import AuctionDetail from "./components/AuctionDetail";
 import PrivateRoute from "./routes/PrivateRoute";
 import PublicRoute from "./routes/PublicRoute";
+import { useEffect } from "react";
+import axiosInstance from "./api/axios";
+import { useAuthStore } from "./stores/authStore";
 
 export default function App() {
+  const ChangeRecentToken = async () => {
+    const res = await axiosInstance.post("/auth/access-token");
+    return res.data.accessToken;
+  };
+
+  useEffect(() => {
+    const fetchToekn = async () => {
+      const token = await ChangeRecentToken();
+      useAuthStore.getState().setRecentToken(token);
+    };
+    fetchToekn();
+  }, []);
+
   return (
     <Routes>
       <Route path="/" element={<Layout />}>
