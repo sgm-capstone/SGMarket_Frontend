@@ -12,7 +12,6 @@ import axiosInstance from "./api/axios";
 import { useAuthStore } from "./stores/authStore";
 import RegisterUser from "./pages/singup/RegisterUser";
 
-
 export default function App() {
   const ChangeRecentToken = async () => {
     const res = await axiosInstance.post("/auth/access-token");
