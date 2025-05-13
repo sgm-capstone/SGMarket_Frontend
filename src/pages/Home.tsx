@@ -1,94 +1,76 @@
-import { useState } from "react";
-import Product from "../components/mainPage/Product";
-import { FaBell, FaChevronLeft, FaPlus } from "react-icons/fa";
-import TopHeader from "../components/TopHeader";
+// src/pages/Home.tsx
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { Virtuoso } from "react-virtuoso";
+import AutoSizer from "react-virtualized-auto-sizer";
+import { FaPlus } from "react-icons/fa";
+import TopHeader from "../components/TopHeader";
+import Product from "../components/mainPage/Product";
+import { fetchAuctions, AuctionItem } from "../api/auction";
+import { categoryMapping } from "../constants/categoryMap";
+import type { CategoryLabel } from "../types/category";
+import { getDDay } from "../utils/getDDay";
 
-const categories = ["전체", "패션", "전자/IT", "책", "중고차"];
+const categories: CategoryLabel[] = Object.keys(
+  categoryMapping
+) as CategoryLabel[];
 
-const sampleProducts = [
-  {
-    title: "맥북 프로 2021",
-    location: "석수1동",
-    dDay: "D -3",
-    maxPrice: "10,000,000원",
-    minPrice: "7,000,000원",
-    imageUrl:
-      "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/mbp14-spacegray-select-202110?wid=892&hei=820&&qlt=80&.v=1632788574000",
-  },
-  {
-    title: "맥북 프로 2021",
-    location: "석수1동",
-    dDay: "D -3",
-    maxPrice: "10,000,000원",
-    minPrice: "7,000,000원",
-    imageUrl:
-      "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/mbp14-spacegray-select-202110?wid=892&hei=820&&qlt=80&.v=1632788574000",
-  },
-  {
-    title: "맥북 프로 2021",
-    location: "석수1동",
-    dDay: "D -3",
-    maxPrice: "10,000,000원",
-    minPrice: "7,000,000원",
-    imageUrl:
-      "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/mbp14-spacegray-select-202110?wid=892&hei=820&&qlt=80&.v=1632788574000",
-  },
-  {
-    title: "맥북 프로 2021",
-    location: "석수1동",
-    dDay: "D -3",
-    maxPrice: "10,000,000원",
-    minPrice: "7,000,000원",
-    imageUrl:
-      "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/mbp14-spacegray-select-202110?wid=892&hei=820&&qlt=80&.v=1632788574000",
-  },
-  {
-    title: "맥북 프로 2021",
-    location: "석수1동",
-    dDay: "D -3",
-    maxPrice: "10,000,000원",
-    minPrice: "7,000,000원",
-    imageUrl:
-      "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/mbp14-spacegray-select-202110?wid=892&hei=820&&qlt=80&.v=1632788574000",
-  },
-  {
-    title: "맥북 프로 2021",
-    location: "석수1동",
-    dDay: "D -3",
-    maxPrice: "10,000,000원",
-    minPrice: "7,000,000원",
-    imageUrl:
-      "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/mbp14-spacegray-select-202110?wid=892&hei=820&&qlt=80&.v=1632788574000",
-  },
-  {
-    title: "맥북 프로 2021",
-    location: "석수1동",
-    dDay: "D -3",
-    maxPrice: "10,000,000원",
-    minPrice: "7,000,000원",
-    imageUrl:
-      "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/mbp14-spacegray-select-202110?wid=892&hei=820&&qlt=80&.v=1632788574000",
-  },
-];
+const PAGE_SIZE = 10; // 한 페이지당 아이템 수
 
-export default function MainPage() {
-  // const [currentRegion, setCurrentRegion] = useState("석수1동");
-  const [selectedCategory, setSelectedCategory] = useState("전체");
+export default function Home() {
+  const [currentRegion] = useState("석수1동");
+  const [selectedCategory, setSelectedCategory] =
+    useState<CategoryLabel>("전체");
+
+  const [products, setProducts] = useState<AuctionItem[]>([]);
+  const [page, setPage] = useState(0);
+  const [hasNextPage, setHasNextPage] = useState(true);
+  const [isNextPageLoading, setIsNextPageLoading] = useState(false);
+
   const navigate = useNavigate();
-  return (
-    <div className="w-full  mx-auto bg-[#101012] text-white px-4 py-3 pb-[100px]">
-      <TopHeader currentRegion="석수1동" />
 
-      <div className="flex mt-10 overflow-x-auto m gap-2 mb-3">
+  useEffect(() => {
+    // reset 상태
+    setProducts([]);
+    setPage(0);
+    setHasNextPage(true);
+    // 그리고 바로 0번째 페이지 로드
+    loadNextPage();
+  }, [selectedCategory]);
+
+  // 다음 페이지 데이터 로드
+  const loadNextPage = useCallback(async () => {
+    if (isNextPageLoading || !hasNextPage) return;
+    setIsNextPageLoading(true);
+    try {
+      const data = await fetchAuctions(selectedCategory, page, PAGE_SIZE);
+      setProducts((prev) => [...prev, ...data]);
+      setPage((prev) => prev + 1);
+      if (data.length < PAGE_SIZE) setHasNextPage(false);
+    } catch (err) {
+      console.error("경매 데이터 불러오기 실패:", err);
+    } finally {
+      setIsNextPageLoading(false);
+    }
+  }, [isNextPageLoading, hasNextPage, page, selectedCategory]);
+
+  // 헤더+카테고리+버튼 영역 뺀 남은 높이 계산
+  const listHeight = window.innerHeight - 180;
+
+  return (
+    <div className="w-full mx-auto bg-[#101012] text-white px-4 py-3  pb-[20px]">
+      <TopHeader currentRegion={currentRegion} />
+
+      {/* 카테고리 */}
+      <div className="flex mt-10 overflow-x-auto gap-2 mb-3">
         {categories.map((cat) => (
           <button
             key={cat}
             onClick={() => setSelectedCategory(cat)}
-            className={`px-4 py-2 rounded-full whitespace-nowrap text-sm  transition-all duration-200 ${
+            className={`px-4 py-2 rounded-full whitespace-nowrap text-sm transition-all duration-200 ${
               selectedCategory === cat
                 ? "bg-white text-black font-bold"
-                : "bg-[#1a1a1a] text-white  font-bold "
+                : "bg-[#1a1a1a] text-white font-bold"
             }`}
           >
             {cat}
@@ -96,17 +78,52 @@ export default function MainPage() {
         ))}
       </div>
 
-      <div
-        className="flex flex-col h-[20%] gap-2"
-        onClick={() => navigate("/auction")}
-      >
-        {sampleProducts.map((p, idx) => (
-          <Product key={idx} {...p} />
-        ))}
+      {/* AutoSizer + Virtuoso 로 가변 높이 가상스크롤 */}
+      <div style={{ height: listHeight, width: "100%" }}>
+        <AutoSizer disableHeight>
+          {({ width }) => (
+            <Virtuoso
+              style={{ height: listHeight, width }}
+              data={products}
+              endReached={() => {
+                if (!isNextPageLoading && hasNextPage) {
+                  loadNextPage();
+                }
+              }}
+              overscan={200}
+              components={{
+                Footer: () =>
+                  isNextPageLoading ? (
+                    <div className="py-4 text-center text-gray-500">
+                      Loading...
+                    </div>
+                  ) : null,
+              }}
+              itemContent={(_, p) =>
+                p ? (
+                  <div
+                    onClick={() => navigate("/auction")}
+                    className="cursor-pointer"
+                  >
+                    <Product
+                      title={p.auctionTitle}
+                      location={currentRegion}
+                      dDay={getDDay(p.auctionEndDate)}
+                      maxPrice={`${p.auctionEndPrice.toLocaleString()}원`}
+                      minPrice={`${p.auctionStartPrice.toLocaleString()}원`}
+                      imageUrl={p.auctionImageUrl}
+                    />
+                  </div>
+                ) : null
+              }
+            />
+          )}
+        </AutoSizer>
       </div>
 
+      {/* + 버튼 */}
       <div
-        className="fixed bottom-[90px] right-0 left-0 mx-auto max-w-[760px] w-full flex justify-end pr-6 pointer-events-none"
+        className="fixed bottom-[80px] right-0 left-0 mx-auto max-w-[760px] w-full flex justify-end pr-6 pointer-events-none z-50 bg-transparent"
         onClick={() => navigate("/create")}
       >
         <div className="pointer-events-auto bg-white text-black p-4 rounded-full shadow-lg">
