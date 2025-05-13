@@ -9,6 +9,7 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use((config) => {
   const { recentToken } = useAuthStore.getState();
   if (recentToken) {
+    config.headers = config.headers ?? {};
     config.headers.Authorization = `Bearer ${recentToken}`;
   }
   return config;
