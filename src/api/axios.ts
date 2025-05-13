@@ -6,7 +6,6 @@ const axiosInstance = axios.create({
   withCredentials: true,
 });
 
-// ✅ 모든 요청에 recentToken 자동 포함
 axiosInstance.interceptors.request.use((config) => {
   const { recentToken } = useAuthStore.getState();
   if (recentToken) {

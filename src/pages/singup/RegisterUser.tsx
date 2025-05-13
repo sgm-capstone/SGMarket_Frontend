@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { FaChevronLeft } from "react-icons/fa";
 import DaumPostcodeEmbed from "react-daum-postcode";
+import { Coordinates } from "../../types/types";
+import axios from "axios";
+import axiosInstance from "../../api/axios";
 
 export default function RegisterUser() {
   const [name, setName] = useState("");
@@ -8,8 +11,34 @@ export default function RegisterUser() {
   const [regionDetail, setRegionDetail] = useState("");
   const [showPostcode, setShowPostcode] = useState(false);
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
+  const [coordinates, setCoordinates] = useState<Coordinates | null>(null);
 
-  const handleComplete = (data: any) => {
+  async function fetchCoordinates(
+    address: string
+  ): Promise<Coordinates | null> {
+    try {
+      const res = await axios.get(
+        "https://dapi.kakao.com/v2/local/search/address.json",
+        {
+          params: { query: address },
+          headers: {
+            Authorization: `KakaoAK ${import.meta.env.VITE_KAKAO_REST_API_KEY}`,
+          },
+        }
+      );
+
+      const result = res.data.documents[0];
+      if (result) {
+        return { x: result.x, y: result.y };
+      }
+      return null;
+    } catch (err) {
+      console.error("좌표 조회 실패:", err);
+      return null;
+    }
+  }
+
+  const handleComplete = async (data: any) => {
     let fullAddress = data.address;
     let extraAddress = "";
 
@@ -24,6 +53,33 @@ export default function RegisterUser() {
 
     setRegion(fullAddress);
     setShowPostcode(false);
+
+    const coords = await fetchCoordinates(fullAddress);
+    if (coords) {
+      setCoordinates(coords);
+      console.log("📍 좌표 저장됨:", coords);
+    }
+  };
+
+  const handleRegister = async () => {
+    if (!name || !region || !coordinates) {
+      alert("모든 정보를 입력해주세요");
+      return;
+    }
+
+    const payload = {
+      latitude: 0,
+      longitude: 0,
+      address: "경수대로 1193",
+      nickname: "허남규",
+    };
+
+    try {
+      const res = await axiosInstance.post("/members/profile", payload);
+      console.log("✅ 회원 등록 성공", res.data);
+    } catch (err) {
+      console.error("❌ 회원 등록 실패", err);
+    }
   };
 
   return (
@@ -75,7 +131,10 @@ export default function RegisterUser() {
       />
 
       <div className="fixed bottom-5 left-1/2 -translate-x-1/2 px-5 w-full max-w-[760px]">
-        <button className="w-full mx-auto block bg-[#1744d8] text-white font-semibold py-4 rounded-md">
+        <button
+          onClick={handleRegister}
+          className="w-full mx-auto block bg-[#1744d8] text-white font-semibold py-4 rounded-md"
+        >
           확인
         </button>
       </div>
@@ -96,15 +155,15 @@ export default function RegisterUser() {
               onComplete={handleComplete}
               style={{ width: "100%", height: "100%" }}
               theme={{
-                bgColor: "#101010", // 바탕 배경색
-                searchBgColor: "#1a1a1a", // 검색창 배경색
-                contentBgColor: "#181818", // 본문 배경색 (검색 결과 등)
-                pageBgColor: "#101010", // 페이지 전체 배경
-                textColor: "#ffffff", // 기본 글자색
-                queryTextColor: "#ffffff", // 검색창 입력 텍스트
-                postcodeTextColor: "#0d6efd", // 우편번호 색상 (로고색이나 강조 색)
-                emphTextColor: "#0d6efd", // 강조 글자색
-                outlineColor: "#333333", // 테두리 색
+                bgColor: "#101010",
+                searchBgColor: "#1a1a1a",
+                contentBgColor: "#181818",
+                pageBgColor: "#101010",
+                textColor: "#ffffff",
+                queryTextColor: "#ffffff",
+                postcodeTextColor: "#0d6efd",
+                emphTextColor: "#0d6efd",
+                outlineColor: "#333333",
               }}
             />
           </div>

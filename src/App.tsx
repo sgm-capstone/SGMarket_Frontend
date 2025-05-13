@@ -13,6 +13,7 @@ import RegisterUser from "./pages/singup/RegisterUser";
 import PublicRoute from "./routes/PublicRoute";
 import PrivateRoute from "./routes/PrivateRoute";
 
+
 export default function App() {
   const setRecentToken = useAuthStore((s) => s.setRecentToken);
   const login = useAuthStore((s) => s.login);
