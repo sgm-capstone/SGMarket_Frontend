@@ -1,3 +1,4 @@
+// Product.tsx
 import { FaCommentDots, FaHeart } from "react-icons/fa";
 
 interface ProductProps {

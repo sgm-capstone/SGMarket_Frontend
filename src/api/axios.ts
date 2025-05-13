@@ -8,8 +8,9 @@ const axiosInstance = axios.create({
 
 // ✅ 모든 요청에 recentToken 자동 포함
 axiosInstance.interceptors.request.use((config) => {
-  const { recentToken } = useAuthStore.getState(); // 중요: 훅이 아닌 getState 사용!
+  const { recentToken } = useAuthStore.getState();
   if (recentToken) {
+    config.headers = config.headers ?? {};
     config.headers.Authorization = `Bearer ${recentToken}`;
   }
   return config;
