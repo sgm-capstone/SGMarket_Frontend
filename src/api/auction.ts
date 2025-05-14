@@ -20,7 +20,7 @@ export async function fetchAuctions(
   page = 0,
   size = 10
 ): Promise<AuctionItem[]> {
-  const categoryCode = categoryMapping[category] ?? "";
+  const categoryCode = categoryMapping[category];
 
   const params: {
     page: number;
@@ -33,30 +33,29 @@ export async function fetchAuctions(
     sort: "createdAt,DESC",
   };
 
-  if (categoryCode) {
+  if (categoryCode !== undefined) {
     params.category = categoryCode;
   }
 
   const res = await axiosInstance.get("/auctions", { params });
   return res.data.data.content;
 }
+
 export interface AuctionRegisterRequest {
   itemRegisterRequest: { itemName: string };
   title: string;
   description: string;
   endDate: string;
   startPrice: number;
-  currentPrice: number;
-  endPrice: number;
   auctionCategory: string;
 }
 
-export function postAuction(payload: AuctionRegisterRequest, file: File) {
+export async function postAuction(payload: AuctionRegisterRequest, file: File) {
   const formData = new FormData();
   formData.append("request", JSON.stringify(payload));
   formData.append("itemImage", file);
 
-  return axiosInstance.post("/auctions", formData, {
+  await axiosInstance.post("/auctions", formData, {
     headers: {
       Accept: "application/json",
     },

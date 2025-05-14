@@ -7,8 +7,10 @@ import "react-datepicker/dist/react-datepicker.css";
 import "../../css/style/DatePickerDark.css";
 import { isAxiosError } from "axios";
 import { useNavigate } from "react-router";
+import type { CategoryLabel } from "../../types/category";
 
-const categoryList = [
+const categoryList: CategoryLabel[] = [
+  "전체",
   "디지털기기",
   "생활가전",
   "가구/인테리어",
@@ -22,12 +24,11 @@ const categoryList = [
   "스포츠/레저",
   "취미/게임/음반",
 ];
-
 export default function ProductForm() {
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState<CategoryLabel>("디지털기기");
   const [showCategorySelect, setShowCategorySelect] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
@@ -56,8 +57,6 @@ export default function ProductForm() {
       description,
       endDate: dayjs(endDate).format("YYYY-MM-DD HH:mm:00"),
       startPrice: parseInt(price, 10),
-      currentPrice: parseInt(price, 10),
-      endPrice: parseInt(price, 10),
       auctionCategory: category,
     };
 
@@ -179,7 +178,7 @@ export default function ProductForm() {
 
       {/* 카테고리 선택 */}
       {showCategorySelect && (
-        <div className="fixed inset-0  pt-3 pb-20 z-50 overflow-y-auto">
+        <div className="fixed inset-0 pt-3 pb-20 z-50 overflow-y-auto">
           <div className="max-w-[760px] mx-auto px-5">
             <div className="flex items-center gap-2 mb-4">
               <button
@@ -196,7 +195,7 @@ export default function ProductForm() {
               {categoryList.map((cat, idx) => (
                 <li
                   key={idx}
-                  className="py-4  border-b border-gray-700 text-sm cursor-pointer hover:bg-gray-800 px-2"
+                  className="py-4 border-b border-gray-700 text-sm cursor-pointer hover:bg-gray-800 px-2"
                   onClick={() => {
                     setCategory(cat);
                     setShowCategorySelect(false);

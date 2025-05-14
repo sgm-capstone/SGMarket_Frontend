@@ -1,5 +1,5 @@
 // src/pages/Home.tsx
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Virtuoso } from "react-virtuoso";
 import AutoSizer from "react-virtualized-auto-sizer";
@@ -15,7 +15,7 @@ const categories: CategoryLabel[] = Object.keys(
   categoryMapping
 ) as CategoryLabel[];
 
-const PAGE_SIZE = 10; // 한 페이지당 아이템 수
+const PAGE_SIZE = 10;
 
 export default function Home() {
   const [currentRegion] = useState("석수1동");
@@ -30,35 +30,40 @@ export default function Home() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // reset 상태
     setProducts([]);
     setPage(0);
     setHasNextPage(true);
-    // 그리고 바로 0번째 페이지 로드
-    loadNextPage();
   }, [selectedCategory]);
 
-  // 다음 페이지 데이터 로드
-  const loadNextPage = useCallback(async () => {
+  useEffect(() => {
+    if (page === 0 && products.length === 0 && hasNextPage) {
+      loadNextPage();
+    }
+  }, [page, products.length, hasNextPage]);
+  const loadNextPage = async (currentPage = page) => {
     if (isNextPageLoading || !hasNextPage) return;
+
     setIsNextPageLoading(true);
     try {
-      const data = await fetchAuctions(selectedCategory, page, PAGE_SIZE);
+      const data = await fetchAuctions(
+        selectedCategory,
+        currentPage,
+        PAGE_SIZE
+      );
       setProducts((prev) => [...prev, ...data]);
-      setPage((prev) => prev + 1);
+      setPage(currentPage + 1);
       if (data.length < PAGE_SIZE) setHasNextPage(false);
     } catch (err) {
       console.error("경매 데이터 불러오기 실패:", err);
     } finally {
-      setIsNextPageLoading(false);
+      setTimeout(() => setIsNextPageLoading(false), 300);
     }
-  }, [isNextPageLoading, hasNextPage, page, selectedCategory]);
+  };
 
-  // 헤더+카테고리+버튼 영역 뺀 남은 높이 계산
   const listHeight = window.innerHeight - 180;
 
   return (
-    <div className="w-full mx-auto bg-[#101012] text-white px-4 py-3  pb-[20px]">
+    <div className="w-full mx-auto bg-[#101012] text-white px-4 py-3 pb-[20px]">
       <TopHeader currentRegion={currentRegion} />
 
       {/* 카테고리 */}
@@ -78,18 +83,15 @@ export default function Home() {
         ))}
       </div>
 
-      {/* AutoSizer + Virtuoso 로 가변 높이 가상스크롤 */}
+      {/* 리스트 */}
       <div style={{ height: listHeight, width: "100%" }}>
         <AutoSizer disableHeight>
           {({ width }) => (
             <Virtuoso
+              key={selectedCategory}
               style={{ height: listHeight, width }}
               data={products}
-              endReached={() => {
-                if (!isNextPageLoading && hasNextPage) {
-                  loadNextPage();
-                }
-              }}
+              endReached={() => loadNextPage()}
               overscan={200}
               components={{
                 Footer: () =>
@@ -109,9 +111,17 @@ export default function Home() {
                       title={p.auctionTitle}
                       location={currentRegion}
                       dDay={getDDay(p.auctionEndDate)}
-                      maxPrice={`${p.auctionEndPrice.toLocaleString()}원`}
-                      minPrice={`${p.auctionStartPrice.toLocaleString()}원`}
-                      imageUrl={p.auctionImageUrl}
+                      maxPrice={
+                        typeof p.auctionEndPrice === "number"
+                          ? `${p.auctionEndPrice.toLocaleString()}원`
+                          : "가격 미정"
+                      }
+                      minPrice={
+                        typeof p.auctionStartPrice === "number"
+                          ? `${p.auctionStartPrice.toLocaleString()}원`
+                          : "가격 미정"
+                      }
+                      imageUrl={p.auctionImageUrl || ""}
                     />
                   </div>
                 ) : null
