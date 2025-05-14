@@ -7,11 +7,13 @@ const axiosInstance = axios.create({
 });
 
 axiosInstance.interceptors.request.use((config) => {
-  const { recentToken } = useAuthStore.getState();
-  if (recentToken) {
-    config.headers = config.headers ?? {};
-    config.headers.Authorization = `Bearer ${recentToken}`;
+  if (!config.url?.includes("/auth/access-token")) {
+    const token = useAuthStore.getState().accessToken;
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
   }
+
   return config;
 });
 
