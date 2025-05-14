@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Route, Routes, Navigate } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import axiosInstance from "./api/axios";
 import { useAuthStore } from "./stores/authStore";
 
@@ -13,9 +13,8 @@ import RegisterUser from "./pages/singup/RegisterUser";
 import PublicRoute from "./routes/PublicRoute";
 import PrivateRoute from "./routes/PrivateRoute";
 
-
 export default function App() {
-  const setRecentToken = useAuthStore((s) => s.setRecentToken);
+  const setAccessToken = useAuthStore((s) => s.setAccessToken);
   const login = useAuthStore((s) => s.login);
   const logout = useAuthStore((s) => s.logout);
 
@@ -24,12 +23,10 @@ export default function App() {
   useEffect(() => {
     (async () => {
       try {
-        // 1) 리프레시 토큰 쿠키로 액세스 토큰 재발급
         const { data } = await axiosInstance.post<{ accessToken: string }>(
           "/auth/access-token"
         );
-        // 2) 스토어에 저장 + 로그인 상태 업데이트
-        setRecentToken(data.accessToken);
+        setAccessToken(data.accessToken);
         login();
       } catch {
         logout();
@@ -37,27 +34,17 @@ export default function App() {
         setCheckingAuth(false);
       }
     })();
-  }, [setRecentToken, login, logout]);
+  }, []);
 
   if (checkingAuth) {
-    // 인증 확인 중엔 로딩 화면
     return <OpenApp />;
   }
-
-  const isLogin = useAuthStore.getState().isLogin;
 
   return (
     <Routes>
       <Route path="/" element={<Layout />}>
-        {/* 루트로 접근 시 로그인 여부로 분기 */}
-        <Route
-          index
-          element={<Navigate to={isLogin ? "/home" : "/login"} replace />}
-        />
-
         <Route element={<PublicRoute />}>
           <Route path="login" element={<LoginPage />} />
-          {/* /loading 경로가 필요하다면 추가 */}
         </Route>
 
         <Route element={<PrivateRoute />}>
