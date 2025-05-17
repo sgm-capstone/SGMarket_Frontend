@@ -12,7 +12,11 @@ import AuctionDetail from "./components/AuctionDetail";
 import RegisterUser from "./pages/singup/RegisterUser";
 import PublicRoute from "./routes/PublicRoute";
 import PrivateRoute from "./routes/PrivateRoute";
+
+import BidInput from "./pages/BidInput";
+
 import ChatPage from "./pages/chat/chatPage";
+
 
 export default function App() {
   const setAccessToken = useAuthStore((s) => s.setAccessToken);
@@ -24,11 +28,13 @@ export default function App() {
   useEffect(() => {
     (async () => {
       try {
-        const { data } = await axiosInstance.post<{ accessToken: string }>(
-          "/auth/access-token"
-        );
+        const { data } = await axiosInstance.post<{
+          accessToken: string;
+          memberId: number;
+        }>("/auth/access-token");
         setAccessToken(data.accessToken);
-        login();
+        const memberId = 1;
+        login(memberId);
       } catch {
         logout();
       } finally {
@@ -51,7 +57,9 @@ export default function App() {
         <Route element={<PrivateRoute />}>
           <Route path="home" element={<Home />} />
           <Route path="create" element={<ProductForm />} />
-          <Route path="auction" element={<AuctionDetail />} />
+          <Route path="edit/:auctionId" element={<ProductForm />} />
+          <Route path="auction/:auctionId" element={<AuctionDetail />} />
+          <Route path="bidinput/:auctionId" element={<BidInput />} />
           <Route path="register" element={<RegisterUser />} />
           <Route path="chat" element={<ChatPage />} />
         </Route>

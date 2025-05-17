@@ -1,13 +1,20 @@
-// AuctionDetail.tsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FaChevronLeft,
   FaChevronRight,
   FaHeart,
   FaChartLine,
+  FaEdit,
+  FaTrash,
 } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
-
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  deleteAuction,
+  getAuctionDetail,
+  getOtherAuctionsByAuthor,
+} from "../api/auction";
+import type { AuctionDetail, AuctionItem } from "../api/auction";
+import { useAuthStore } from "../stores/authStore";
 const bidHistory = [
   { date: "25.03.19", price: "105,000,000", user: "데일리 백수" },
   { date: "25.03.19", price: "95,000,000", user: "남남남" },
@@ -15,9 +22,56 @@ const bidHistory = [
 ];
 
 export default function AuctionDetail() {
+  const { auctionId } = useParams();
+  const navigate = useNavigate();
+  const userId = useAuthStore((s) => s.memberId);
+
+  const [auction, setAuction] = useState<AuctionDetail | null>(null);
+  const [others, setOthers] = useState<AuctionItem[]>([]);
   const [tab, setTab] = useState("상세정보");
   const [bidTab, setBidTab] = useState("입찰 내역");
-  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!auctionId) return;
+    const fetchData = async () => {
+      try {
+        const data = await getAuctionDetail(Number(auctionId));
+        setAuction(data);
+        const others = await getOtherAuctionsByAuthor(Number(auctionId));
+        setOthers(others);
+      } catch (e) {
+        console.error("경매 상세 조회 실패", e);
+      }
+    };
+    fetchData();
+  }, [auctionId]);
+
+  if (!auction)
+    return (
+      <div className="text-white text-center py-20">
+        경매 정보를 불러오는 중...
+      </div>
+    );
+
+  const isMyAuction = auction.auctionMember.memberId === userId;
+
+  const handleEdit = () => {
+    navigate(`/edit/${auctionId}`, {
+      state: { mode: "edit", auctionId },
+    });
+  };
+
+  const handleDelete = async () => {
+    if (confirm("정말 삭제하시겠습니까?")) {
+      try {
+        await deleteAuction(auction.auctionId);
+        alert("삭제되었습니다.");
+        navigate("/home");
+      } catch (e) {
+        alert("삭제 중 오류가 발생했습니다.");
+      }
+    }
+  };
   return (
     <div className="bg-[#101010] text-white w-full max-w-[760px] mx-auto min-h-screen pb-20">
       {/* 헤더 */}
@@ -26,11 +80,21 @@ export default function AuctionDetail() {
           <FaChevronLeft onClick={() => navigate(-1)} />
         </button>
         <h1 className="text-lg font-bold">경매</h1>
+        {/*  수정/삭제 버튼 */}
+        {isMyAuction && (
+          <div className="absolute right-4 flex gap-3 text-white text-lg">
+            <FaEdit onClick={handleEdit} className="cursor-pointer" />
+            <FaTrash
+              onClick={handleDelete}
+              className="cursor-pointer text-red-500"
+            />
+          </div>
+        )}
       </div>
 
       {/* 이미지 */}
       <img
-        src="https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/mbp14-spacegray-select-202110?wid=892&hei=820&&qlt=80&.v=1632788574000"
+        src={auction.auctionImageUrl}
         className="w-full object-contain"
         alt="auction"
       />
@@ -38,32 +102,40 @@ export default function AuctionDetail() {
       {/* 기본 정보 */}
       <div className="px-4 py-4 border-b border-gray-700">
         <div className="flex justify-between items-center">
-          <h2 className="text-lg font-extrabold">맥북 프로 2021</h2>
+          <h2 className="text-lg font-extrabold">{auction.auctionTitle}</h2>
           <div className="flex items-center gap-2">
             <div className="bg-white text-black px-2 py-1 rounded-full text-xs">
-              좋은 사람
+              {auction.auctionMember.memberName}
             </div>
             <FaChevronRight className="text-white text-sm" />
           </div>
         </div>
-        <p className="text-xl font-extrabold mt-1">1,000,000원</p>
+        <p className="text-xl font-extrabold mt-1">
+          {auction.auctionStartPrice.toLocaleString()}원
+        </p>
 
+        {/* 탭 */}
         <div className="grid grid-cols-3 text-xs text-center mt-4 border-t border-b border-gray-700 divide-x divide-gray-700">
           <div className="py-2">
-            <div className="text-gray-400">최근 거래가</div>
-            <div className="font-medium">950,000</div>
+            <div className="text-gray-400">현재가</div>
+            <div className="font-medium">
+              {auction.auctionCurrentPrice.toLocaleString()}
+            </div>
           </div>
           <div className="py-2">
-            <div className="text-gray-400">최대 거래가</div>
-            <div className="font-medium">1,200,000</div>
+            <div className="text-gray-400">최대가</div>
+            <div className="font-medium">
+              {auction.auctionEndPrice
+                ? auction.auctionEndPrice.toLocaleString()
+                : "-"}
+            </div>
           </div>
           <div className="py-2">
-            <div className="text-gray-400">출시년도</div>
-            <div className="font-medium">2023</div>
+            <div className="text-gray-400">카테고리</div>
+            <div className="font-medium">{auction.auctionCategory}</div>
           </div>
         </div>
 
-        {/* 탭 */}
         <div className="flex mt-4 border-b border-gray-700 text-[13px] font-bold">
           {["시세", "상세정보"].map((label) => (
             <button
@@ -84,21 +156,15 @@ export default function AuctionDetail() {
           <div className="py-4">
             <p className="text-[15px] font-bold leading-tight mb-1">최근,</p>
             <p className="text-[18px] font-bold mb-2 leading-tight">
-              맥북 프로 2021
+              {auction.auctionItem.itemName}
             </p>
             <div className="bg-white h-[200px] w-full flex items-center justify-center text-black">
-              <FaChartLine size={32} /> {/* dummy chart */}
+              <FaChartLine size={32} />
             </div>
           </div>
         ) : (
-          <div className="py-4 text-sm leading-relaxed">
-            안녕하세요 사기꾼 아닙니다
-            <br />
-            ~~에 희망합니다.
-            <br />
-            택배거래 및 직거래 가능할 것 같아요
-            <br />
-            문의시 DM주세요
+          <div className="py-4 text-sm leading-relaxed whitespace-pre-line">
+            {auction.auctionDescription}
           </div>
         )}
       </div>
@@ -108,13 +174,14 @@ export default function AuctionDetail() {
         <p className="font-bold text-[25px] leading-relaxed">
           현재,
           <br />
-          맥북 프로 2021 <span className=" tx text-gray-400">에 대한</span>
+          {auction.auctionItem.itemName}{" "}
+          <span className=" tx text-gray-400">에 대한</span>
           <br />
           경매 상황이에요.
         </p>
 
         <div className="flex bg-gray-500 rounded-md mt-4 mb-3">
-          {["최대 제시가", "최저 제시가", "입찰 내역"].map((b) => (
+          {["최대 제시가", "입찰 내역"].map((b) => (
             <button
               key={b}
               onClick={() => setBidTab(b)}
@@ -164,24 +231,40 @@ export default function AuctionDetail() {
       <div className="px-4 py-6">
         <div className="flex justify-between items-center mb-3">
           <p className="text-[14px] font-bold">
-            <span className="text-white">좋은사람</span> 님의 다른물품 보기
+            <span className="text-white">
+              {auction.auctionMember.memberName}
+            </span>{" "}
+            님의 다른물품 보기
           </p>
           <FaChevronRight className="text-white text-sm" />
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          {[1, 2].map((_, i) => (
-            <div key={i} className="bg-[#181818] rounded-lg overflow-hidden">
-              <img
-                src="https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/mbp14-spacegray-select-202110?wid=892&hei=820&&qlt=80&.v=1632788574000"
-                alt="item"
-                className="w-full h-32 object-contain bg-white"
-              />
-              <div className="p-2">
-                <p className="text-[13px] font-semibold">맥북프로</p>
-                <p className="text-xs text-gray-300">500,000원</p>
+
+        <div className="flex overflow-x-auto gap-4 scrollbar-hide">
+          {others.length > 0 ? (
+            others.map((item) => (
+              <div
+                key={item.auctionId}
+                onClick={() => navigate(`/auction/${item.auctionId}`)}
+                className="min-w-[48%] max-w-[48%] bg-[#181818] rounded-lg overflow-hidden cursor-pointer flex-shrink-0"
+              >
+                <img
+                  src={item.auctionImageUrl}
+                  alt="item"
+                  className="w-full h-32 object-contain bg-white"
+                />
+                <div className="p-2">
+                  <p className="text-[13px] font-semibold truncate">
+                    {item.auctionTitle}
+                  </p>
+                  <p className="text-xs text-gray-300">
+                    {item.auctionStartPrice.toLocaleString()}원
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            <p className="text-gray-400 text-sm">다른 경매 상품이 없습니다.</p>
+          )}
         </div>
       </div>
 
@@ -191,7 +274,10 @@ export default function AuctionDetail() {
           <FaHeart />
         </button>
         <div className="flex gap-2">
-          <button className="px-5 py-2 bg-red-600 text-white text-sm font-semibold rounded">
+          <button
+            onClick={() => navigate(`/bidinput/${auction.auctionId}`)}
+            className="px-5 py-2 bg-red-600 text-white text-sm font-semibold rounded"
+          >
             제시하기
           </button>
           <button className="px-5 py-2 bg-blue-700 text-white text-sm font-semibold rounded">
