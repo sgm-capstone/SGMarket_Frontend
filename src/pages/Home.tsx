@@ -104,7 +104,7 @@ export default function Home() {
               itemContent={(_, p) =>
                 p ? (
                   <div
-                    onClick={() => navigate("/auction")}
+                    onClick={() => navigate(`/auction/${p.auctionId}`)}
                     className="cursor-pointer"
                   >
                     <Product
