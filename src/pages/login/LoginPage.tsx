@@ -1,13 +1,8 @@
-import { useAuthStore } from "../../stores/authStore";
 import { FaGoogle, FaComment } from "react-icons/fa";
 import Logo from "../../assets/images/Logo.svg";
 
 const LoginPage = () => {
-  const login = useAuthStore((state) => state.login);
-
   const handleKakaoLogin = () => {
-    login();
-
     const clientId = import.meta.env.VITE_KAKAO_CLIENT_ID;
     const redirectUri = import.meta.env.VITE_KAKAO_REDIRECT_URI;
 
@@ -17,7 +12,16 @@ const LoginPage = () => {
   };
 
   const handleGoogleLogin = () => {
-    console.log("Google login ");
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    const redirectUri = encodeURIComponent(
+      import.meta.env.VITE_GOOGLE_REDIRECT_URI
+    );
+    const scope = encodeURIComponent("openid email profile");
+    const responseType = "code";
+
+    const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&scope=${scope}`;
+
+    window.location.href = googleAuthUrl;
   };
 
   return (

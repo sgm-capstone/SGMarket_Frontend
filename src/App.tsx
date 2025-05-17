@@ -12,11 +12,11 @@ import AuctionDetail from "./components/AuctionDetail";
 import RegisterUser from "./pages/singup/RegisterUser";
 import PublicRoute from "./routes/PublicRoute";
 import PrivateRoute from "./routes/PrivateRoute";
-
 import BidInput from "./pages/BidInput";
-
+import ChatList from "./pages/chat/chatList";
 import ChatPage from "./pages/chat/chatPage";
-
+import { getMyInfo } from "./api/member";
+import { useMemberStore } from "./stores/memberStore";
 
 export default function App() {
   const setAccessToken = useAuthStore((s) => s.setAccessToken);
@@ -28,15 +28,18 @@ export default function App() {
   useEffect(() => {
     (async () => {
       try {
-        const { data } = await axiosInstance.post<{
-          accessToken: string;
-          memberId: number;
-        }>("/auth/access-token");
+        const { data } = await axiosInstance.post<{ accessToken: string }>(
+          "/auth/access-token"
+        );
+
         setAccessToken(data.accessToken);
-        const memberId = 1;
-        login(memberId);
+        login();
+
+        const member = await getMyInfo();
+        useMemberStore.getState().setMember(member);
       } catch {
         logout();
+        useMemberStore.getState().clearMember();
       } finally {
         setCheckingAuth(false);
       }
@@ -61,7 +64,8 @@ export default function App() {
           <Route path="auction/:auctionId" element={<AuctionDetail />} />
           <Route path="bidinput/:auctionId" element={<BidInput />} />
           <Route path="register" element={<RegisterUser />} />
-          <Route path="chat" element={<ChatPage />} />
+          <Route path="chat" element={<ChatList />} />
+          <Route path="chat/:roomId" element={<ChatPage />} />
         </Route>
       </Route>
     </Routes>

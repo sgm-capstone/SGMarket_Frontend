@@ -23,7 +23,7 @@ export default function ChatPage() {
   ]);
 
   return (
-    <div className="w-full max-w-[760px] min-h-screen mx-auto bg-[#101010] text-white flex flex-col">
+    <div className="w-full max-w-[760px] mx-auto bg-[#101010] text-white flex flex-col">
       {/* Header */}
       {isSeller ? <ChatSellerHeader /> : <ChatBuyerHeader />}
 
