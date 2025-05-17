@@ -12,7 +12,11 @@ import AuctionDetail from "./components/AuctionDetail";
 import RegisterUser from "./pages/singup/RegisterUser";
 import PublicRoute from "./routes/PublicRoute";
 import PrivateRoute from "./routes/PrivateRoute";
+
 import BidInput from "./pages/BidInput";
+
+import ChatPage from "./pages/chat/chatPage";
+
 
 export default function App() {
   const setAccessToken = useAuthStore((s) => s.setAccessToken);
@@ -57,6 +61,7 @@ export default function App() {
           <Route path="auction/:auctionId" element={<AuctionDetail />} />
           <Route path="bidinput/:auctionId" element={<BidInput />} />
           <Route path="register" element={<RegisterUser />} />
+          <Route path="chat" element={<ChatPage />} />
         </Route>
       </Route>
     </Routes>
