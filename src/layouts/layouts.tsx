@@ -4,7 +4,10 @@ import BottomNav from "../components/BottomNav";
 
 function Layout() {
   const location = useLocation();
-  const showNav = location.pathname === "/home";
+  const showNav =
+    location.pathname === "/home" ||
+    location.pathname === "/chat" ||
+    location.pathname === "/myPage";
 
   const renderBottmNav = () => {
     if (showNav) {

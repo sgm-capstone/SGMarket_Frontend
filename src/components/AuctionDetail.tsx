@@ -14,7 +14,8 @@ import {
   getOtherAuctionsByAuthor,
 } from "../api/auction";
 import type { AuctionDetail, AuctionItem } from "../api/auction";
-import { useAuthStore } from "../stores/authStore";
+import { useMemberStore } from "../stores/memberStore";
+
 const bidHistory = [
   { date: "25.03.19", price: "105,000,000", user: "데일리 백수" },
   { date: "25.03.19", price: "95,000,000", user: "남남남" },
@@ -24,7 +25,7 @@ const bidHistory = [
 export default function AuctionDetail() {
   const { auctionId } = useParams();
   const navigate = useNavigate();
-  const userId = useAuthStore((s) => s.memberId);
+  const userId = useMemberStore((s) => s.member?.id);
 
   const [auction, setAuction] = useState<AuctionDetail | null>(null);
   const [others, setOthers] = useState<AuctionItem[]>([]);
