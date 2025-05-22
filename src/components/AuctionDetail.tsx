@@ -3,7 +3,6 @@ import {
   FaChevronLeft,
   FaChevronRight,
   FaHeart,
-  FaChartLine,
   FaEdit,
   FaTrash,
 } from "react-icons/fa";
@@ -11,27 +10,71 @@ import { useNavigate, useParams } from "react-router-dom";
 import {
   deleteAuction,
   getAuctionDetail,
+  getAuctionPriceHistory,
   getOtherAuctionsByAuthor,
 } from "../api/auction";
-import type { AuctionDetail, AuctionItem } from "../api/auction";
+import type { AuctionDetail, AuctionItem, PriceHistory } from "../api/auction";
+import { getAuctionBidHistory, getMaxBid } from "../api/bid";
+import type { BidHistory, MaxBid } from "../api/bid";
 import { useMemberStore } from "../stores/memberStore";
-
-const bidHistory = [
-  { date: "25.03.19", price: "105,000,000", user: "데일리 백수" },
-  { date: "25.03.19", price: "95,000,000", user: "남남남" },
-  { date: "25.03.17", price: "98,000,000", user: "조아요요" },
-];
+import { LineChart, XAxis, YAxis, Tooltip, Line } from "recharts";
+import dayjs from "dayjs";
 
 export default function AuctionDetail() {
   const { auctionId } = useParams();
   const navigate = useNavigate();
   const userId = useMemberStore((s) => s.member?.id);
-
+  const [maxBid, setMaxBid] = useState<MaxBid | null>(null);
   const [auction, setAuction] = useState<AuctionDetail | null>(null);
   const [others, setOthers] = useState<AuctionItem[]>([]);
   const [tab, setTab] = useState("상세정보");
   const [bidTab, setBidTab] = useState("입찰 내역");
+  const [priceHistory, setPriceHistory] = useState<PriceHistory[]>([]);
+  const [bidHistory, setBidHistory] = useState<BidHistory[]>([]);
+  useEffect(() => {
+    if (!auctionId) return;
+    const fetchData = async () => {
+      try {
+        const detail = await getAuctionDetail(Number(auctionId));
+        setAuction(detail);
 
+        const others = await getOtherAuctionsByAuthor(Number(auctionId));
+        setOthers(others);
+
+        const history = await getAuctionPriceHistory(Number(auctionId));
+        setPriceHistory(history);
+        const max = await getMaxBid(Number(auctionId));
+        setMaxBid(max);
+      } catch (e) {
+        console.error("경매 상세/시세 조회 실패", e);
+      }
+    };
+    fetchData();
+  }, [auctionId]);
+
+  useEffect(() => {
+    if (!auctionId) return;
+
+    const fetchData = async () => {
+      try {
+        const detail = await getAuctionDetail(Number(auctionId));
+        setAuction(detail);
+
+        const others = await getOtherAuctionsByAuthor(Number(auctionId));
+        setOthers(others);
+
+        const priceHistory = await getAuctionPriceHistory(Number(auctionId));
+        setPriceHistory(priceHistory);
+
+        const bids = await getAuctionBidHistory(Number(auctionId));
+        setBidHistory(bids);
+      } catch (e) {
+        console.error("경매 상세 조회 실패", e);
+      }
+    };
+
+    fetchData();
+  }, [auctionId]);
   useEffect(() => {
     if (!auctionId) return;
     const fetchData = async () => {
@@ -126,9 +169,7 @@ export default function AuctionDetail() {
           <div className="py-2">
             <div className="text-gray-400">최대가</div>
             <div className="font-medium">
-              {auction.auctionEndPrice
-                ? auction.auctionEndPrice.toLocaleString()
-                : "-"}
+              {maxBid ? `${maxBid.bidPrice.toLocaleString()}원` : "-"}
             </div>
           </div>
           <div className="py-2">
@@ -155,13 +196,28 @@ export default function AuctionDetail() {
 
         {tab === "시세" ? (
           <div className="py-4">
-            <p className="text-[15px] font-bold leading-tight mb-1">최근,</p>
-            <p className="text-[18px] font-bold mb-2 leading-tight">
+            <p className="text-[15px] font-bold mb-1">최근,</p>
+            <p className="text-[18px] font-bold mb-2">
               {auction.auctionItem.itemName}
             </p>
-            <div className="bg-white h-[200px] w-full flex items-center justify-center text-black">
-              <FaChartLine size={32} />
-            </div>
+
+            {priceHistory.length > 0 ? (
+              <div className="w-full h-48 bg-white p-2 rounded text-black">
+                <LineChart width={700} height={200} data={priceHistory}>
+                  <XAxis
+                    dataKey="recordedAt"
+                    tickFormatter={(d) => dayjs(d).format("MM/DD")}
+                  />
+                  <YAxis />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="price" stroke="#8884d8" />
+                </LineChart>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-400 mt-4">
+                아직 시세 이력이 없습니다.
+              </p>
+            )}
           </div>
         ) : (
           <div className="py-4 text-sm leading-relaxed whitespace-pre-line">
@@ -201,7 +257,9 @@ export default function AuctionDetail() {
           <p className="text-center text-[14px] font-bold mt-4 leading-relaxed">
             현재 최대 제시가는
             <br />
-            <span className="text-[24px]">105,000,000원</span>
+            <span className="text-[24px]">
+              {maxBid ? `${maxBid.bidPrice.toLocaleString()}원` : "-"}
+            </span>
             <br />
             입니다. 😁
           </p>
@@ -210,20 +268,26 @@ export default function AuctionDetail() {
         {bidTab === "입찰 내역" && (
           <div className="mt-4">
             <div className="grid grid-cols-3 text-[12px] text-gray-400 border-b border-gray-600 pb-2">
-              <div>제시일</div>
-              <div>제시가</div>
               <div>닉네임</div>
+              <div>금액</div>
+              <div>제시일</div>
             </div>
-            {bidHistory.map((bid, i) => (
-              <div
-                key={i}
-                className="grid grid-cols-3 text-sm py-2 border-b border-gray-800 text-[13px]"
-              >
-                <div>{bid.date}</div>
-                <div>{bid.price}</div>
-                <div>{bid.user}</div>
-              </div>
-            ))}
+            {bidHistory.length > 0 ? (
+              bidHistory.map((bid, i) => (
+                <div
+                  key={i}
+                  className="grid grid-cols-3 text-sm py-2 border-b border-gray-800 text-[13px]"
+                >
+                  <div>{bid.memberInfo.memberName}</div>
+                  <div>{bid.bidPrice.toLocaleString()}원</div>
+                  <div>-</div> 
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-400 text-sm mt-2">
+                아직 입찰 내역이 없습니다.
+              </p>
+            )}
           </div>
         )}
       </div>
@@ -274,17 +338,19 @@ export default function AuctionDetail() {
         <button className="text-white text-2xl">
           <FaHeart />
         </button>
-        <div className="flex gap-2">
-          <button
-            onClick={() => navigate(`/bidinput/${auction.auctionId}`)}
-            className="px-5 py-2 bg-red-600 text-white text-sm font-semibold rounded"
-          >
-            제시하기
-          </button>
-          <button className="px-5 py-2 bg-blue-700 text-white text-sm font-semibold rounded">
-            채팅하기
-          </button>
-        </div>
+        {!isMyAuction && (
+          <div className="flex gap-2">
+            <button
+              onClick={() => navigate(`/bidinput/${auction.auctionId}`)}
+              className="px-5 py-2 bg-red-600 text-white text-sm font-semibold rounded"
+            >
+              제시하기
+            </button>
+            <button className="px-5 py-2 bg-blue-700 text-white text-sm font-semibold rounded">
+              채팅하기
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

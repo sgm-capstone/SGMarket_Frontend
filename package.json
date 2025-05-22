@@ -25,6 +25,7 @@
     "react-virtuoso": "^4.12.7",
     "react-window": "^1.8.11",
     "react-window-infinite-loader": "^1.0.10",
+    "recharts": "^2.15.3",
     "tailwind-merge": "^2.5.5",
     "zustand": "^5.0.3"
   },

@@ -139,3 +139,17 @@ export async function getOtherAuctionsByAuthor(auctionId: number) {
   });
   return res.data.data.content;
 }
+
+// 시세 이력 타입
+export interface PriceHistory {
+  id: number;
+  price: number;
+  recordedAt: string;
+}
+
+export async function getAuctionPriceHistory(
+  auctionId: number
+): Promise<PriceHistory[]> {
+  const res = await axiosInstance.get(`/auctions/${auctionId}/price-history`);
+  return res.data.data;
+}
