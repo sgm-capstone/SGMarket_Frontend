@@ -11,6 +11,7 @@ export interface AuctionItem {
   auctionStartPrice: number;
   auctionEndPrice: number;
   auctionImageUrl: string;
+  isLiked: boolean;
   auctionItem: {
     itemName: string;
   };
@@ -79,6 +80,7 @@ export interface AuctionDetail {
   auctionImageUrl: string;
   auctionCategory: string;
   likeCount: number;
+  isLiked: boolean;
   auctionItem: {
     itemName: string;
   };
@@ -108,11 +110,12 @@ export interface AuctionUpdateRequest {
 export async function patchAuction(
   auctionId: number,
   payload: AuctionUpdateRequest,
-  file?: File
+  file?: File | null
 ): Promise<void> {
   const formData = new FormData();
   formData.append("request", JSON.stringify(payload));
-  if (file) {
+
+  if (file instanceof File) {
     formData.append("itemImage", file);
   }
 
@@ -151,5 +154,49 @@ export async function getAuctionPriceHistory(
   auctionId: number
 ): Promise<PriceHistory[]> {
   const res = await axiosInstance.get(`/auctions/${auctionId}/price-history`);
+  return res.data.data;
+}
+
+// 랜덤 경매 조회 타입
+export interface RandomAuction {
+  auctionId: number;
+  auctionTitle: string;
+  auctionDescription: string;
+  auctionStartDate: string;
+  auctionEndDate: string;
+  auctionStartPrice: number;
+  auctionCurrentPrice: number;
+  auctionEndPrice: number | null;
+  auctionImageUrl: string;
+  auctionCategory: string;
+  likeCount: number;
+  auctionItem: {
+    itemName: string;
+  };
+  auctionMember: {
+    memberId: number;
+    memberName: string;
+    memberProfileImageUrl: string;
+  };
+  status: string;
+}
+
+// 랜덤 경매 조회 API 함수
+export async function getRandomAuction(): Promise<RandomAuction> {
+  const res = await axiosInstance.get("/auctions/random");
+  return res.data.data;
+}
+
+// 좋아요 토글 응답 타입
+export interface ToggleLikeResponse {
+  auctionId: number;
+  isLiked: boolean;
+  likeCount: number;
+}
+// 좋아요 토글 API 함수
+export async function toggleAuctionLike(
+  auctionId: number
+): Promise<ToggleLikeResponse> {
+  const res = await axiosInstance.post(`/auctions/${auctionId}/like`);
   return res.data.data;
 }

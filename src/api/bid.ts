@@ -55,3 +55,20 @@ export async function getMaxBid(auctionId: number): Promise<MaxBid> {
   const res = await axiosInstance.get(`/auctions/${auctionId}/bids/max`);
   return res.data.data;
 }
+
+export interface SettleBidResponse {
+  bidPrice: number;
+  memberInfo: {
+    memberId: number;
+    memberName: string;
+    memberProfileImageUrl?: string;
+  };
+}
+
+// 낙찰 처리 API
+export async function postSettleBid(
+  auctionId: number
+): Promise<SettleBidResponse> {
+  const res = await axiosInstance.post(`/auctions/${auctionId}/bids/settle`);
+  return res.data.data;
+}

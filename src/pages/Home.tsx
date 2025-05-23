@@ -122,6 +122,7 @@ export default function Home() {
                           : "가격 미정"
                       }
                       imageUrl={p.auctionImageUrl || ""}
+                      isLiked={p.isLiked}
                     />
                   </div>
                 ) : null

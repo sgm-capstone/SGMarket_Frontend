@@ -7,7 +7,8 @@ function Layout() {
   const showNav =
     location.pathname === "/home" ||
     location.pathname === "/chat" ||
-    location.pathname === "/myPage";
+    location.pathname === "/myPage" ||
+    location.pathname === "/random";
 
   const renderBottmNav = () => {
     if (showNav) {
