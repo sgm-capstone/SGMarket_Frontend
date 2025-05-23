@@ -8,6 +8,7 @@ interface ProductProps {
   maxPrice: string;
   minPrice: string;
   imageUrl: string;
+  isLiked: boolean;
 }
 
 export default function Product({
@@ -17,6 +18,7 @@ export default function Product({
   maxPrice,
   minPrice,
   imageUrl,
+  isLiked,
 }: ProductProps) {
   return (
     <div className="flex flex-row justify-between items-start gap-3 py-3 border-b border-gray-600 w-full max-w-full">
@@ -58,7 +60,9 @@ export default function Product({
           {/* 채팅/하트 아이콘 */}
           <div className="flex  items-end gap-2 text-gray-400 text-sm">
             <FaCommentDots className="w-4 h-4 sm:w-5 sm:h-5 cursor-pointer" />
-            <FaHeart className="w-4 h-4 sm:w-5 sm:h-5 cursor-pointer" />
+            <div className="text-red-500 text-lg">
+              <FaHeart className={isLiked ? "text-red-500" : "text-white"} />
+            </div>
           </div>
         </div>
       </div>
