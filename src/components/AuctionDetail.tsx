@@ -12,12 +12,20 @@ import {
   getAuctionDetail,
   getAuctionPriceHistory,
   getOtherAuctionsByAuthor,
+  toggleAuctionLike,
 } from "../api/auction";
 import type { AuctionDetail, AuctionItem, PriceHistory } from "../api/auction";
 import { getAuctionBidHistory, getMaxBid } from "../api/bid";
 import type { BidHistory, MaxBid } from "../api/bid";
 import { useMemberStore } from "../stores/memberStore";
-import { LineChart, XAxis, YAxis, Tooltip, Line } from "recharts";
+import {
+  ResponsiveContainer,
+  LineChart,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Line,
+} from "recharts";
 import dayjs from "dayjs";
 
 export default function AuctionDetail() {
@@ -31,24 +39,32 @@ export default function AuctionDetail() {
   const [bidTab, setBidTab] = useState("입찰 내역");
   const [priceHistory, setPriceHistory] = useState<PriceHistory[]>([]);
   const [bidHistory, setBidHistory] = useState<BidHistory[]>([]);
+  const [isLiked, setIsLiked] = useState(false);
   useEffect(() => {
     if (!auctionId) return;
+
     const fetchData = async () => {
       try {
         const detail = await getAuctionDetail(Number(auctionId));
         setAuction(detail);
+        setIsLiked(detail.isLiked); // 💡 좋아요 상태 저장
 
         const others = await getOtherAuctionsByAuthor(Number(auctionId));
         setOthers(others);
 
         const history = await getAuctionPriceHistory(Number(auctionId));
         setPriceHistory(history);
+
+        const bids = await getAuctionBidHistory(Number(auctionId));
+        setBidHistory(bids);
+
         const max = await getMaxBid(Number(auctionId));
         setMaxBid(max);
       } catch (e) {
-        console.error("경매 상세/시세 조회 실패", e);
+        console.error("경매 상세 조회 실패", e);
       }
     };
+
     fetchData();
   }, [auctionId]);
 
@@ -114,6 +130,15 @@ export default function AuctionDetail() {
       } catch (e) {
         alert("삭제 중 오류가 발생했습니다.");
       }
+    }
+  };
+
+  const handleToggleLike = async () => {
+    try {
+      const data = await toggleAuctionLike(auction.auctionId);
+      setIsLiked(data.isLiked);
+    } catch (e) {
+      console.error("좋아요 토글 실패", e);
     }
   };
   return (
@@ -195,32 +220,67 @@ export default function AuctionDetail() {
         </div>
 
         {tab === "시세" ? (
-          <div className="py-4">
-            <p className="text-[15px] font-bold mb-1">최근,</p>
-            <p className="text-[18px] font-bold mb-2">
+          <div className="py-6 px-4">
+            <p className="text-[15px] font-semibold text-gray-300 mb-1">
+              최근,
+            </p>
+            <p className="text-[20px] font-extrabold text-white mb-4">
               {auction.auctionItem.itemName}
             </p>
 
             {priceHistory.length > 0 ? (
-              <div className="w-full h-48 bg-white p-2 rounded text-black">
-                <LineChart width={700} height={200} data={priceHistory}>
-                  <XAxis
-                    dataKey="recordedAt"
-                    tickFormatter={(d) => dayjs(d).format("MM/DD")}
-                  />
-                  <YAxis />
-                  <Tooltip />
-                  <Line type="monotone" dataKey="price" stroke="#8884d8" />
-                </LineChart>
+              <div className="bg-[#1e1e1e] p-4 rounded-lg border border-gray-700">
+                <h3 className="text-sm text-gray-400 font-semibold mb-2">
+                  📈 시세 변화
+                </h3>
+                <ResponsiveContainer width="100%" height={220}>
+                  <LineChart
+                    data={priceHistory}
+                    margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                  >
+                    <XAxis
+                      dataKey="recordedAt"
+                      tickFormatter={(d) => dayjs(d).format("MM/DD")}
+                      stroke="#ccc"
+                      fontSize={8}
+                    />
+                    <YAxis
+                      tickFormatter={(v) => v.toLocaleString()}
+                      stroke="#ccc"
+                      fontSize={8}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#333",
+                        borderRadius: 8,
+                        border: "none",
+                      }}
+                      labelFormatter={(label) =>
+                        `${dayjs(label).format("YYYY.MM.DD HH:mm")}`
+                      }
+                      formatter={(value: number) => [
+                        `${value.toLocaleString()}원`,
+                        "가격",
+                      ]}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="price"
+                      stroke="#4F8DFD"
+                      strokeWidth={2}
+                      dot={{ r: 4, stroke: "#4F8DFD", fill: "#4F8DFD" }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
             ) : (
-              <p className="text-sm text-gray-400 mt-4">
+              <p className="text-sm text-gray-500 mt-4">
                 아직 시세 이력이 없습니다.
               </p>
             )}
           </div>
         ) : (
-          <div className="py-4 text-sm leading-relaxed whitespace-pre-line">
+          <div className="py-4 text-sm leading-relaxed whitespace-pre-line px-4">
             {auction.auctionDescription}
           </div>
         )}
@@ -276,11 +336,16 @@ export default function AuctionDetail() {
               bidHistory.map((bid, i) => (
                 <div
                   key={i}
-                  className="grid grid-cols-3 text-sm py-2 border-b border-gray-800 text-[13px]"
+                  className="grid grid-cols-3 text-sm py-2 border-b border-gray-800 text-[13px] cursor-pointer hover:bg-gray-800"
+                  onClick={() =>
+                    navigate(`/completeBid/${auction.auctionId}`, {
+                      state: { bid },
+                    })
+                  }
                 >
                   <div>{bid.memberInfo.memberName}</div>
                   <div>{bid.bidPrice.toLocaleString()}원</div>
-                  <div>-</div> 
+                  <div>-</div>
                 </div>
               ))
             ) : (
@@ -335,8 +400,8 @@ export default function AuctionDetail() {
 
       {/* 하단 버튼 */}
       <div className="fixed bottom-0 left-0 right-0 max-w-[760px] mx-auto w-full bg-[#101010] border-t border-gray-800 flex justify-between items-center px-4 py-3 z-50">
-        <button className="text-white text-2xl">
-          <FaHeart />
+        <button onClick={handleToggleLike} className="text-white text-2xl">
+          <FaHeart className={isLiked ? "text-red-500" : "text-white"} />
         </button>
         {!isMyAuction && (
           <div className="flex gap-2">
