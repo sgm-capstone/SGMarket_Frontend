@@ -17,6 +17,8 @@ import ChatList from "./pages/chat/chatList";
 import ChatPage from "./pages/chat/chatPage";
 import { getMyInfo } from "./api/member";
 import { useMemberStore } from "./stores/memberStore";
+import RandomAuction from "./pages/RandomAuction";
+import CompleteBid from "./pages/CompleteBid";
 
 export default function App() {
   const setAccessToken = useAuthStore((s) => s.setAccessToken);
@@ -66,6 +68,8 @@ export default function App() {
           <Route path="register" element={<RegisterUser />} />
           <Route path="chat" element={<ChatList />} />
           <Route path="chat/:roomId" element={<ChatPage />} />
+          <Route path="random" element={<RandomAuction />} />
+          <Route path="completeBid/:auctionId" element={<CompleteBid />} />
         </Route>
       </Route>
     </Routes>
