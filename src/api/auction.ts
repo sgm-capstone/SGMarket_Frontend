@@ -10,6 +10,7 @@ export interface AuctionItem {
   auctionEndDate: string;
   auctionStartPrice: number;
   auctionEndPrice: number;
+  auctionCurrentPrice: number;
   auctionImageUrl: string;
   isLiked: boolean;
   auctionItem: {

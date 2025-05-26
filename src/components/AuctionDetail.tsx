@@ -27,6 +27,7 @@ import {
   Line,
 } from "recharts";
 import dayjs from "dayjs";
+import { createDirectChat } from "../api/chat";
 
 export default function AuctionDetail() {
   const { auctionId } = useParams();
@@ -47,7 +48,7 @@ export default function AuctionDetail() {
       try {
         const detail = await getAuctionDetail(Number(auctionId));
         setAuction(detail);
-        setIsLiked(detail.isLiked); // 💡 좋아요 상태 저장
+        setIsLiked(detail.isLiked);
 
         const others = await getOtherAuctionsByAuthor(Number(auctionId));
         setOthers(others);
@@ -141,6 +142,21 @@ export default function AuctionDetail() {
       console.error("좋아요 토글 실패", e);
     }
   };
+
+  const handleChat = async () => {
+    if (!auction) return;
+    try {
+      const chatRoom = await createDirectChat({
+        receiverId: auction.auctionMember.memberId,
+        initialMessage: "안녕하세요! 관심 있어서 연락드립니다.",
+      });
+
+      navigate(`/chat/${chatRoom.id}`);
+    } catch (e) {
+      console.error("채팅방 생성 실패", e);
+      alert("채팅방을 생성할 수 없습니다.");
+    }
+  };
   return (
     <div className="bg-[#101010] text-white w-full max-w-[760px] mx-auto min-h-screen pb-20">
       {/* 헤더 */}
@@ -230,9 +246,6 @@ export default function AuctionDetail() {
 
             {priceHistory.length > 0 ? (
               <div className="bg-[#1e1e1e] p-4 rounded-lg border border-gray-700">
-                <h3 className="text-sm text-gray-400 font-semibold mb-2">
-                  📈 시세 변화
-                </h3>
                 <ResponsiveContainer width="100%" height={220}>
                   <LineChart
                     data={priceHistory}
@@ -337,11 +350,12 @@ export default function AuctionDetail() {
                 <div
                   key={i}
                   className="grid grid-cols-3 text-sm py-2 border-b border-gray-800 text-[13px] cursor-pointer hover:bg-gray-800"
-                  onClick={() =>
+                  onClick={() => {
+                    if (!isMyAuction) return;
                     navigate(`/completeBid/${auction.auctionId}`, {
                       state: { bid },
-                    })
-                  }
+                    });
+                  }}
                 >
                   <div>{bid.memberInfo.memberName}</div>
                   <div>{bid.bidPrice.toLocaleString()}원</div>
@@ -411,7 +425,10 @@ export default function AuctionDetail() {
             >
               제시하기
             </button>
-            <button className="px-5 py-2 bg-blue-700 text-white text-sm font-semibold rounded">
+            <button
+              onClick={handleChat}
+              className="px-5 py-2 bg-blue-700 text-white text-sm font-semibold rounded"
+            >
               채팅하기
             </button>
           </div>
