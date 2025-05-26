@@ -41,17 +41,17 @@ export default function Product({
         </div>
 
         <div className="flex flex-row justify-between items-end w-full">
-          {/* 최대/최소/날짜 영역 */}
+          {/* 현재/시작/날짜 영역 */}
           <div className="flex flex-col gap-1 text-[12px] sm:text-sm">
             <div className="flex items-center  gap-1">
               <span className="bg-blue-600 text-white rounded-full px-2 py-1 font-semibold text-[11px]">
-                최대
+                현재
               </span>
               <span className="text-white font-bold">{maxPrice}</span>
             </div>
             <div className="flex items-center gap-1">
               <span className="bg-gray-400 text-white rounded-full px-2 py-1 font-semibold text-[11px]">
-                최소
+                시작
               </span>
               <span className="text-white font-bold">{minPrice}</span>
             </div>

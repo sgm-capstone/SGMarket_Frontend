@@ -112,8 +112,10 @@ export default function Home() {
                       location={currentRegion}
                       dDay={getDDay(p.auctionEndDate)}
                       maxPrice={
-                        typeof p.auctionEndPrice === "number"
-                          ? `${p.auctionEndPrice.toLocaleString()}원`
+                        typeof p.auctionCurrentPrice === "number"
+                          ? p.auctionCurrentPrice === 0
+                            ? "아직 없음"
+                            : `${p.auctionCurrentPrice.toLocaleString()}원`
                           : "가격 미정"
                       }
                       minPrice={
