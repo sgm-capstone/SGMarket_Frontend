@@ -15,7 +15,7 @@ const BottomNav = () => {
     { icon: <FaThumbsUp size={24} />, label: "랜덤경매", path: "/random" },
     { icon: <FaChartLine size={24} />, label: "My경매", path: "/my" },
     { icon: <FaComments size={24} />, label: "채팅", path: "/chat" },
-    { icon: <FaBars size={24} />, label: "메뉴", path: "/menu" },
+    { icon: <FaBars size={24} />, label: "메뉴", path: "/mypage" },
   ];
 
   return (
