@@ -8,7 +8,7 @@ import LoginPage from "./pages/login/LoginPage";
 import OpenApp from "./pages/loading/OpenApp";
 import Home from "./pages/Home";
 import ProductForm from "./components/productForm/ProductForm";
-import AuctionDetail from "./components/AuctionDetail";
+import AuctionDetail from "./pages/Auction/AuctionDetail";
 import RegisterUser from "./pages/singup/RegisterUser";
 import PublicRoute from "./routes/PublicRoute";
 import PrivateRoute from "./routes/PrivateRoute";
