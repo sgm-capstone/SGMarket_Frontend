@@ -51,9 +51,16 @@ export interface MaxBid {
 }
 
 // 최대 입찰가 조회 API
-export async function getMaxBid(auctionId: number): Promise<MaxBid> {
-  const res = await axiosInstance.get(`/auctions/${auctionId}/bids/max`);
-  return res.data.data;
+export async function getMaxBid(auctionId: number): Promise<MaxBid | null> {
+  try {
+    const res = await axiosInstance.get(`/auctions/${auctionId}/bids/max`);
+    return res.data.data;
+  } catch (error: any) {
+    if (error.response?.status === 404) {
+      return null;
+    }
+    throw error;
+  }
 }
 
 export interface SettleBidResponse {
