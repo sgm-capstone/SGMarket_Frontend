@@ -16,6 +16,7 @@ export interface AuctionItem {
   auctionItem: {
     itemName: string;
   };
+  status: string;
 }
 
 // 경매 목록 조회

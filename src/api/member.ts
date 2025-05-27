@@ -1,6 +1,6 @@
 // src/api/member.ts
 import axiosInstance from "./axios";
-
+import type { AuctionItem } from "./auction";
 export interface MemberInfo {
   id: number;
   email: string;
@@ -9,9 +9,46 @@ export interface MemberInfo {
   address: string;
   latitude: number;
   longitude: number;
+  point: number;
 }
 
 export async function getMyInfo(): Promise<MemberInfo> {
   const res = await axiosInstance.get("/members");
+  return res.data.data;
+}
+
+interface LikedAuctionResponse {
+  content: AuctionItem[];
+  page: number;
+  size: number;
+  hasNext: boolean;
+  first: boolean;
+  last: boolean;
+}
+
+export async function getLikedAuctions(): Promise<LikedAuctionResponse> {
+  const res = await axiosInstance.get("/members/auctions-likes?page=0&size=20");
+  return res.data.data;
+}
+
+export async function getMyAuctions(): Promise<{
+  content: AuctionItem[];
+  page: number;
+  size: number;
+  hasNext: boolean;
+}> {
+  const res = await axiosInstance.get("/members/auctions?page=0&size=20");
+  return res.data.data;
+}
+
+export async function getMyBids(): Promise<{
+  content: AuctionItem[];
+  page: number;
+  size: number;
+  hasNext: boolean;
+  first: boolean;
+  last: boolean;
+}> {
+  const res = await axiosInstance.get("/members/auctions-bids?page=0&size=20");
   return res.data.data;
 }
