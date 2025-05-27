@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { matchPath, Outlet, useLocation } from "react-router-dom";
 import BottomNav from "../components/BottomNav";
 
 function Layout() {
@@ -7,8 +7,10 @@ function Layout() {
   const showNav =
     location.pathname === "/home" ||
     location.pathname === "/chat" ||
-    location.pathname === "/myPage" ||
-    location.pathname === "/random";
+    location.pathname === "/mypage" ||
+    location.pathname === "/random" ||
+    matchPath("/mypage/:random", location.pathname) ||
+    matchPath("/profile/:memberId", location.pathname);
 
   const renderBottmNav = () => {
     if (showNav) {
