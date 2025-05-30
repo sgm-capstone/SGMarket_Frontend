@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useNavigate } from "react-router-dom";
 import axiosInstance from "./api/axios";
 import { useAuthStore } from "./stores/authStore";
 
@@ -24,6 +24,7 @@ import ProfilePage from "./pages/userProFile/Profile";
 import LikeListPage from "./pages/myPage/LikeListPage";
 import MyAuctionsPage from "./pages/myPage/MyAuctionsPage";
 import MyBidListPage from "./pages/myPage/MyBidListPage";
+import RegisterComplete from "./pages/singup/RegisterComplete";
 
 export default function App() {
   const setAccessToken = useAuthStore((s) => s.setAccessToken);
@@ -31,6 +32,7 @@ export default function App() {
   const logout = useAuthStore((s) => s.logout);
 
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     (async () => {
@@ -38,13 +40,17 @@ export default function App() {
         const { data } = await axiosInstance.post<{ accessToken: string }>(
           "/auth/access-token"
         );
-
         setAccessToken(data.accessToken);
         login();
 
         const member = await getMyInfo();
-        useMemberStore.getState().setMember(member);
-      } catch {
+        useMemberStore.getState().setMember(member); // ✅ 멤버 정보 저장
+      } catch (err: any) {
+        if (err.message === "NEED_REGISTER") {
+          navigate("/register"); // ✅ 회원가입 페이지로 이동
+          return;
+        }
+
         logout();
         useMemberStore.getState().clearMember();
       } finally {
@@ -71,6 +77,7 @@ export default function App() {
           <Route path="auction/:auctionId" element={<AuctionDetail />} />
           <Route path="bidinput/:auctionId" element={<BidInput />} />
           <Route path="register" element={<RegisterUser />} />
+          <Route path="registerCom" element={<RegisterComplete />} />
           <Route path="chat" element={<ChatList />} />
           <Route path="chat/:roomId" element={<ChatPage />} />
           <Route path="random" element={<RandomAuction />} />

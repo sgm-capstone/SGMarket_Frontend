@@ -4,6 +4,7 @@ import DaumPostcodeEmbed from "react-daum-postcode";
 import { Coordinates } from "../../types/types";
 import axios from "axios";
 import axiosInstance from "../../api/axios";
+import { useNavigate } from "react-router-dom";
 
 export default function RegisterUser() {
   const [name, setName] = useState("");
@@ -12,6 +13,7 @@ export default function RegisterUser() {
   const [showPostcode, setShowPostcode] = useState(false);
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
   const [coordinates, setCoordinates] = useState<Coordinates | null>(null);
+  const navigate = useNavigate();
 
   async function fetchCoordinates(
     address: string
@@ -68,15 +70,16 @@ export default function RegisterUser() {
     }
 
     const payload = {
-      latitude: 0,
-      longitude: 0,
-      address: "경수대로 1193",
-      nickname: "허남규",
+      latitude: parseFloat(coordinates.y), // 위도
+      longitude: parseFloat(coordinates.x), // 경도
+      address: `${region} ${regionDetail}`.trim(),
+      nickname: name,
     };
 
     try {
-      const res = await axiosInstance.post("/members/profile", payload);
+      const res = await axiosInstance.patch("/members", payload);
       console.log("✅ 회원 등록 성공", res.data);
+      navigate("/registerCom");
     } catch (err) {
       console.error("❌ 회원 등록 실패", err);
     }

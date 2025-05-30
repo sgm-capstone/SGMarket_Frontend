@@ -13,8 +13,15 @@ export interface MemberInfo {
 }
 
 export async function getMyInfo(): Promise<MemberInfo> {
-  const res = await axiosInstance.get("/members");
-  return res.data.data;
+  try {
+    const res = await axiosInstance.get("/members");
+    return res.data.data;
+  } catch (err: any) {
+    if (err.response?.status === 500) {
+      throw new Error("NEED_REGISTER");
+    }
+    throw err;
+  }
 }
 
 interface LikedAuctionResponse {
