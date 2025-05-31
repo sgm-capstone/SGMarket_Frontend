@@ -112,6 +112,7 @@ export default function AuctionDetail() {
     try {
       const chatRoom = await createDirectChat({
         receiverId: auction.auctionMember.memberId,
+        itemId: auction.auctionItem.itemId,
         initialMessage: "안녕하세요! 관심 있어서 연락드립니다.",
       });
       navigate(`/chat/${chatRoom.id}`);
