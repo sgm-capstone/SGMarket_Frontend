@@ -85,6 +85,7 @@ export interface AuctionDetail {
   isLiked: boolean;
   auctionItem: {
     itemName: string;
+    itemId: number;
   };
   auctionMember: {
     memberId: number;

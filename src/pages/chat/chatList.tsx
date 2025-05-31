@@ -35,25 +35,27 @@ export default function ChatList() {
       <div className="flex flex-col">
         {chats.map((chat) => (
           <div
-            key={chat.id}
+            key={chat.roomId}
             className="flex items-center gap-4 px-4 py-3 border-b border-gray-800"
-            onClick={() => navigate(`/chat/${chat.id}`)}
+            onClick={() => navigate(`/chat/${chat.roomId}`)}
           >
             <img
-              src="/default-profile.png" // 필요시 상대 프로필 이미지
+              src={chat.otherUserProfileImage || "/default-profile.png"}
               alt="프로필"
               className="w-14 h-14 rounded-full object-cover bg-white"
             />
             <div className="flex-1 min-w-0">
               <div className="flex justify-between items-center">
-                <p className="font-bold truncate">{chat.name}</p>
+                <p className="font-bold truncate">{chat.otherUserNickname}</p>
                 <span className="text-xs text-gray-400">
-                  {new Date(chat.createdAt).toLocaleDateString()}
+                  {chat.lastMessageTime
+                    ? new Date(chat.lastMessageTime).toLocaleDateString()
+                    : "최근 메시지 없음"}
                 </span>
               </div>
               <div className="flex justify-between items-center mt-0.5">
                 <p className="text-sm text-gray-400 truncate">
-                  최근 메시지 없음
+                  {chat.lastMessage || "최근 메시지 없음"}
                 </p>
                 <span className="text-xs text-gray-400">석수1동</span>
               </div>
