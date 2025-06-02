@@ -26,6 +26,7 @@ import MyAuctionsPage from "./pages/myPage/MyAuctionsPage";
 import MyBidListPage from "./pages/myPage/MyBidListPage";
 import RegisterComplete from "./pages/singup/RegisterComplete";
 import ChargeCoin from "./pages/chargeCoin";
+import EditProfilePage from "./pages/myPage/EditProfilePage";
 
 export default function App() {
   const setAccessToken = useAuthStore((s) => s.setAccessToken);
@@ -87,8 +88,10 @@ export default function App() {
           <Route path="myPage/liked" element={<LikeListPage />} />
           <Route path="myPage/auctions" element={<MyAuctionsPage />} />
           <Route path="myPage/bid" element={<MyBidListPage />} />
+          <Route path="mypage/edit/:memberId" element={<EditProfilePage />} />
           <Route path="profile/:memberId" element={<ProfilePage />} />
-          <Route path="charge" element={<ChargeCoin></ChargeCoin>} />
+
+          <Route path="charge" element={<ChargeCoin />} />
         </Route>
       </Route>
     </Routes>
