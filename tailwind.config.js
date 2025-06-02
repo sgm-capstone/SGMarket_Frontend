@@ -2,7 +2,12 @@
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        MapleBold: ["Maplestory-Bold", "sans-serif"],
+        MapleLight: ["Maplestory-Light", "sans-serif"],
+      },
+    },
   },
   plugins: [],
   future: {

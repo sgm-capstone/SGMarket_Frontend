@@ -19,7 +19,7 @@ const BottomNav = () => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 z-50 w-full max-w-[760px] bg-[#3E3E3E] text-white rounded-t-xl">
+    <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 z-50 w-full max-w-[760px] bg-[#3E3E3E] font-MapleBold text-white rounded-t-xl">
       <ul className="flex justify-around items-center h-[72px]">
         {navItems.map((item, idx) => (
           <li
