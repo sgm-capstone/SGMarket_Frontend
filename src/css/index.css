@@ -1,4 +1,5 @@
 @import "./taliwind.css";
+@import "./fonts.css";
 
 ::-webkit-scrollbar {
   display: none;

@@ -27,7 +27,7 @@ function Layout() {
       ref={scrollContainerRef}
       className="relative border border-black max-w-[760px] min-w-[320px] w-full h-screen mx-auto flex flex-col overflow-y-auto"
     >
-      <div className="flex-1 flex justify-center w-full ">
+      <div className="flex-1 flex justify-center w-full font-MapleLight">
         <Outlet />
       </div>
       {renderBottmNav()}
