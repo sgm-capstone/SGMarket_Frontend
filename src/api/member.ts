@@ -59,3 +59,14 @@ export async function getMyBids(): Promise<{
   const res = await axiosInstance.get("/members/auctions-bids?page=0&size=20");
   return res.data.data;
 }
+
+export interface UpdateMemberRequest {
+  nickname: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+}
+export async function updateMyInfo(data: UpdateMemberRequest) {
+  const res = await axiosInstance.patch("/members", data);
+  return res.data;
+}

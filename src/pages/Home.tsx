@@ -1,4 +1,3 @@
-// src/pages/Home.tsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Virtuoso } from "react-virtuoso";
@@ -10,15 +9,18 @@ import { fetchAuctions, AuctionItem } from "../api/auction";
 import { categoryMapping } from "../constants/categoryMap";
 import type { CategoryLabel } from "../types/category";
 import { getDDay } from "../utils/getDDay";
+import { useMemberStore } from "../stores/memberStore";
+import { getMainRegion } from "../utils/getMainRegion";
 
 const categories: CategoryLabel[] = Object.keys(
   categoryMapping
 ) as CategoryLabel[];
-
 const PAGE_SIZE = 10;
 
 export default function Home() {
-  const [currentRegion] = useState("석수1동");
+  const member = useMemberStore((state) => state.member);
+  const fullAddress = member?.address || "주소 없음";
+  const [currentRegion] = useState(getMainRegion(fullAddress));
   const [selectedCategory, setSelectedCategory] =
     useState<CategoryLabel>("전체");
 
@@ -40,6 +42,7 @@ export default function Home() {
       loadNextPage();
     }
   }, [page, products.length, hasNextPage]);
+
   const loadNextPage = async (currentPage = page) => {
     if (isNextPageLoading || !hasNextPage) return;
 
@@ -105,7 +108,7 @@ export default function Home() {
                 p ? (
                   <div
                     onClick={() => navigate(`/auction/${p.auctionId}`)}
-                    className="cursor-pointer"
+                    className="cursor-pointer hover:bg-gray-800 transition-colors duration-200"
                   >
                     <Product
                       title={p.auctionTitle}
@@ -136,11 +139,11 @@ export default function Home() {
 
       {/* + 버튼 */}
       <div
-        className="fixed bottom-[80px] right-0 left-0 mx-auto max-w-[760px] w-full flex justify-end pr-6 pointer-events-none z-50 bg-transparent"
+        className="fixed bottom-[80px] right-0 left-0  mx-auto max-w-[760px] w-full flex justify-end pr-6 pointer-events-none z-50 bg-transparent"
         onClick={() => navigate("/create")}
       >
-        <div className="pointer-events-auto bg-white text-black p-4 rounded-full shadow-lg">
-          <FaPlus />
+        <div className="pointer-events-auto bg-white  text-black p-4 rounded-full shadow-lg">
+          <FaPlus className="" />
         </div>
       </div>
     </div>

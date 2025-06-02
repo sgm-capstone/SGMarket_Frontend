@@ -59,8 +59,8 @@ export default function Product({
 
           {/* 채팅/하트 아이콘 */}
           <div className="flex  items-end gap-2 text-gray-400 text-sm">
-            <FaCommentDots className="w-4 h-4 sm:w-5 sm:h-5 cursor-pointer" />
-            <div className="text-red-500 text-lg">
+            <FaCommentDots className="w-4 h-4 sm:w-5 sm:h-5 cursor-pointer " />
+            <div className="text-red-500 text-lg mr-2">
               <FaHeart className={isLiked ? "text-red-500" : "text-white"} />
             </div>
           </div>

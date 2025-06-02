@@ -8,6 +8,11 @@ export default function MyPage() {
   const member = useMemberStore((state) => state.member);
 
   const mainMenus = [
+    {
+      label: "프로필 수정",
+      emoji: "✏️",
+      route: `/mypage/edit/${member?.id ?? ""}`,
+    },
     { label: "찜한 물품", emoji: "❤️", route: "/mypage/liked" },
     { label: "구매 목록", emoji: "✔️", route: "/mypage/bid" },
     { label: "내 경매 목록", emoji: "🧪", route: "/mypage/auctions" },
@@ -33,7 +38,7 @@ export default function MyPage() {
 
       {/* 프로필 */}
       <div
-        className="px-4 py-4 flex items-center justify-between border-b border-gray-800"
+        className="px-4 py-4 flex items-center justify-between border-b border-gray-800 cursor-pointer hover:bg-gray-800 transition-colors duration-200"
         onClick={() => navigate(`/profile/${member?.id}`)}
       >
         <div className="flex items-center gap-4">
@@ -50,7 +55,7 @@ export default function MyPage() {
             </p>
           </div>
         </div>
-        <FaChevronRight className="text-gray-500" />
+        <FaChevronRight className="text-gray-500 " />
       </div>
 
       {/* 추천 배너 */}
@@ -74,7 +79,7 @@ export default function MyPage() {
           {mainMenus.map((item) => (
             <div
               key={item.label}
-              className="flex justify-between items-center px-4 py-3 text-sm text-white cursor-pointer"
+              className="flex justify-between items-center px-4 py-3 text-sm text-white  cursor-pointer hover:bg-gray-800 transition-colors duration-200"
               onClick={() => navigate(item.route)}
             >
               <span>
@@ -93,7 +98,7 @@ export default function MyPage() {
           {serviceMenus.map((item) => (
             <div
               key={item.label}
-              className="flex justify-between items-center px-4 py-3 text-sm text-white cursor-pointer"
+              className="flex justify-between items-center px-4 py-3 text-sm text-white cursor-pointer hover:bg-gray-800 transition-colors duration-200"
               onClick={() => navigate(item.route)}
             >
               <span>
