@@ -1,5 +1,6 @@
 import { FaChevronRight } from "react-icons/fa";
 import { AuctionDetail } from "../../api/auction";
+import { useNavigate } from "react-router-dom";
 
 interface Props {
   auction: AuctionDetail;
@@ -14,13 +15,17 @@ export default function AuctionBasicInfo({
   onTabChange,
   maxBidPrice,
 }: Props) {
+  const navigate = useNavigate();
   return (
     <div className="px-4 py-4 border-b border-gray-700">
       <div className="flex justify-between items-center">
         <h2 className="text-lg font-extrabold">{auction.auctionTitle}</h2>
-        <div className="flex items-center gap-2">
+        <div
+          className="flex items-center gap-2 cursor-pointer hover:bg-gray-800 transition-colors duration-200 px-2 py-1 rounded-full"
+          onClick={() => navigate(`/profile/${auction.auctionMember.memberId}`)}
+        >
           <div className="bg-white text-black px-2 py-1 rounded-full text-xs">
-            {auction.auctionMember.memberName}
+            {auction.auctionMember.memberName}님
           </div>
           <FaChevronRight className="text-white text-sm" />
         </div>
