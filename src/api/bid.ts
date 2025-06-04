@@ -23,6 +23,7 @@ export async function postBid(
 
 export interface BidHistory {
   bidPrice: number;
+  bidTime: string;
   memberInfo: {
     memberId: number;
     memberName: string;

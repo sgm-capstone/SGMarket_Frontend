@@ -80,7 +80,11 @@ export default function AuctionBids({
               >
                 <div>{bid.memberInfo.memberName}</div>
                 <div>{bid.bidPrice.toLocaleString()}원</div>
-                <div>-</div>
+                {new Date(bid.bidTime).toLocaleDateString("ko-KR", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
               </div>
             ))
           ) : (
