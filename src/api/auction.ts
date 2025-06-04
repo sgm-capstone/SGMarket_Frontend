@@ -16,6 +16,11 @@ export interface AuctionItem {
   auctionItem: {
     itemName: string;
   };
+  auctionMember: {
+    memberId: number;
+    memberName: string;
+    memberProfileImageUrl: string;
+  };
   status: string;
 }
 

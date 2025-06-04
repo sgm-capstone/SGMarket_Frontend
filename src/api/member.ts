@@ -70,3 +70,21 @@ export async function updateMyInfo(data: UpdateMemberRequest) {
   const res = await axiosInstance.patch("/members", data);
   return res.data;
 }
+
+export async function getAuctionsByMemberId(
+  memberId: number,
+  page = 0,
+  size = 20
+) {
+  const res = await axiosInstance.get(
+    `/members/${memberId}/auctions?page=${page}&size=${size}`
+  );
+  return res.data.data as {
+    content: AuctionItem[];
+    page: number;
+    size: number;
+    hasNext: boolean;
+    first: boolean;
+    last: boolean;
+  };
+}
