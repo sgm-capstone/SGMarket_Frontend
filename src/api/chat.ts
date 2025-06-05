@@ -1,5 +1,5 @@
 import axiosInstance from "./axios";
-
+import { ChatMessage } from "../types/types";
 // DM 생성 요청
 export interface DirectChatRequest {
   receiverId: number;
@@ -39,4 +39,37 @@ export interface DirectChatRoom {
 export async function getMyDirectChats(): Promise<DirectChatRoom[]> {
   const res = await axiosInstance.get("/chat/direct");
   return res.data.data;
+}
+
+// 채팅 조회
+export async function getChatMessages(
+  roomId: string,
+  count = 50,
+  before?: string,
+  currentUserId?: number
+): Promise<ChatMessage[]> {
+  const res = await axiosInstance.get(`/chat/room/${roomId}/messages`, {
+    params: {
+      count,
+      ...(before ? { before } : {}),
+    },
+  });
+
+  return res.data.data.map((msg: any, index: number) => {
+    const isMine = String(msg.senderId) === String(currentUserId);
+    const uiType: "my" | "opponent" | "system" =
+      msg.type === "TALK" ? (isMine ? "my" : "opponent") : "system";
+
+    return {
+      id: Date.now() + index,
+      text: msg.message,
+      type: uiType,
+      timestamp: msg.createdAt,
+      senderId: msg.senderId,
+      createdAt: msg.createdAt,
+      roomId: msg.roomId,
+      sender: msg.sender,
+      messageType: msg.type,
+    };
+  });
 }
