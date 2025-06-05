@@ -112,13 +112,13 @@ export default function AuctionDetail() {
     try {
       const chatRoom = await createDirectChat({
         receiverId: auction.auctionMember.memberId,
-        itemId: auction.auctionItem.itemId,
-        initialMessage: "안녕하세요! 관심 있어서 연락드립니다.",
+        itemId: auction.auctionId,
+        initialMessage: "",
       });
       navigate(`/chat/${chatRoom.id}`);
-    } catch (e) {
+    } catch (e: any) {
       console.error("채팅방 생성 실패", e);
-      alert("채팅방을 생성할 수 없습니다.");
+      alert(e.response?.data?.message || "채팅방을 생성할 수 없습니다.");
     }
   };
 

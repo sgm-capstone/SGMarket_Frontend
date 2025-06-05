@@ -30,7 +30,8 @@ export async function fetchAuctions(
   page = 0,
   size = 10
 ): Promise<AuctionItem[]> {
-  const categoryCode = categoryMapping[category];
+  const categoryCode =
+    categoryMapping[category as keyof typeof categoryMapping];
 
   const params: {
     page: number;
@@ -43,7 +44,7 @@ export async function fetchAuctions(
     sort: "createdAt,DESC",
   };
 
-  if (categoryCode !== undefined) {
+  if (categoryCode) {
     params.category = categoryCode;
   }
 
