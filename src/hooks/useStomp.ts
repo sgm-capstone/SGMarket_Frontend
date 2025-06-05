@@ -7,10 +7,10 @@ export default function useStomp(
   onMessage: (message: any) => void
 ) {
   const clientRef = useRef<Client | null>(null);
-
+  const WS_URL = import.meta.env.VITE_WS_URL;
   useEffect(() => {
     const client = new Client({
-      brokerURL: `wss://dev.sgmarket.store/ws-stomp`,
+      brokerURL: WS_URL,
       reconnectDelay: 5000,
       onConnect: () => {
         console.log("🟢 STOMP 연결 성공");
