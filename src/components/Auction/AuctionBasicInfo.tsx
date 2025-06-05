@@ -1,6 +1,7 @@
 import { FaChevronRight } from "react-icons/fa";
 import { AuctionDetail } from "../../api/auction";
 import { useNavigate } from "react-router-dom";
+import { categoryLabelMapping } from "../../constants/categoryMap";
 
 interface Props {
   auction: AuctionDetail;
@@ -55,7 +56,10 @@ export default function AuctionBasicInfo({
         </div>
         <div className="py-2">
           <div className="text-gray-400">카테고리</div>
-          <div className="font-medium">{auction.auctionCategory}</div>
+          <div className="font-medium">
+            {categoryLabelMapping[auction.auctionCategory] ||
+              auction.auctionCategory}
+          </div>
         </div>
       </div>
 
