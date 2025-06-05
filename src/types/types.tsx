@@ -1,15 +1,16 @@
-// TypeScript 타입 정의 파일 (.d.ts)
-
 export interface Coordinates {
   x: string; // 경도
   y: string; // 위도
 }
 
-export type ChatMessageType = "my" | "opponent";
-
 export interface ChatMessage {
   id: number;
-  type: ChatMessageType;
   text: string;
+  type: "my" | "opponent" | "system";
   timestamp: string;
+  senderId: number | string;
+  createdAt?: string;
+  roomId?: string;
+  sender?: string | null;
+  messageType?: "TALK" | "ENTER" | "LEAVE";
 }
