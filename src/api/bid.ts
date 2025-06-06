@@ -4,11 +4,13 @@ interface MemberInfo {
   memberId: number;
   memberName: string;
   memberProfileImageUrl: string;
+  coin: number;
 }
 
 interface BidResponse {
   bidPrice: number;
   memberInfo: MemberInfo;
+  bidTime: string;
 }
 
 export async function postBid(

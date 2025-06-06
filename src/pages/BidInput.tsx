@@ -1,42 +1,75 @@
 import { useEffect, useState } from "react";
 import { FaChevronLeft } from "react-icons/fa";
 import { useNavigate, useParams } from "react-router-dom";
-import { postBid } from "../api/bid";
+import { postBid, getMaxBid } from "../api/bid";
 import { getAuctionDetail, type AuctionDetail } from "../api/auction";
+import { useMemberStore } from "../stores/memberStore";
 
 export default function BidInput() {
   const navigate = useNavigate();
   const { auctionId } = useParams();
-  const [price, setPrice] = useState("");
-
+  const [priceInput, setPriceInput] = useState("");
+  const [price, setPrice] = useState<number>(0);
   const [auction, setAuction] = useState<AuctionDetail | null>(null);
+  const [maxBid, setMaxBid] = useState<number | null>(null);
+  const member = useMemberStore((state) => state.member);
 
   useEffect(() => {
     if (!auctionId) return;
-    const fetchAuction = async () => {
+
+    const fetchData = async () => {
       try {
-        const data = await getAuctionDetail(Number(auctionId));
-        setAuction(data);
+        const id = Number(auctionId);
+        const auctionData = await getAuctionDetail(id);
+        const max = await getMaxBid(id);
+
+        setAuction(auctionData);
+        setMaxBid(max?.bidPrice ?? null);
       } catch (err) {
         console.error("경매 정보 조회 실패", err);
         alert("경매 정보를 불러오는 데 실패했습니다.");
         navigate(-1);
       }
     };
-    fetchAuction();
+
+    fetchData();
   }, [auctionId]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/[^\d]/g, "");
+    const numeric = Number(raw);
+    setPrice(numeric);
+    setPriceInput(numeric === 0 ? "" : `${numeric.toLocaleString()}코인`);
+  };
 
   const handleSubmit = async () => {
     if (!price) return alert("가격을 입력해주세요.");
     if (!auctionId) return alert("경매 ID가 유효하지 않습니다.");
+    if (price === 0) return alert("0코인은 입력할 수 없습니다.");
+
+    if (maxBid !== null && price <= maxBid) {
+      return alert(
+        `현재 최고 입찰가(${maxBid.toLocaleString()}코인)보다 높은 금액만 입력할 수 있습니다.`
+      );
+    }
 
     try {
-      await postBid(Number(auctionId), Number(price));
-      alert(`${Number(price).toLocaleString()}원 제시 완료!`);
+      const bidResult = await postBid(Number(auctionId), price);
+      alert(`${bidResult.bidPrice.toLocaleString()}코인 제시 완료!`);
       navigate(-1);
-    } catch (error) {
+    } catch (error: any) {
       console.error("입찰 실패", error);
-      alert("입찰 중 오류가 발생했습니다.");
+
+      if (error.response?.status === 400) {
+        const goToCharge = confirm(
+          "보유 코인이 부족합니다. 충전 페이지로 이동할까요?"
+        );
+        if (goToCharge) {
+          navigate("/charge");
+        }
+      } else {
+        alert("입찰 중 오류가 발생했습니다.");
+      }
     }
   };
 
@@ -82,12 +115,25 @@ export default function BidInput() {
           inputMode="numeric"
           placeholder="금액을 입력해주세요"
           className="w-full mt-10 h-9 bg-black border-b border-blue-500 text-white text-3xl font-bold text-center outline-none"
-          value={price}
-          onChange={(e) => setPrice(e.target.value.replace(/\D/g, ""))}
+          value={priceInput}
+          onChange={handleChange}
         />
+
+        {/* 현재 최고가 */}
+        {maxBid !== null && (
+          <div className="text-sm text-gray-400 mt-2">
+            현재 최고 입찰가: {maxBid.toLocaleString()}코인
+          </div>
+        )}
 
         {/* 제시하기 설명 */}
         <p className="mt-6 text-[18px] font-bold">제시하기.</p>
+        <div>
+          보유 코인:{" "}
+          {member && member.coin !== null
+            ? `${member.coin.toLocaleString()}코인`
+            : "0"}
+        </div>
       </div>
 
       {/* 하단 버튼 */}

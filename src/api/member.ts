@@ -9,7 +9,7 @@ export interface MemberInfo {
   address: string;
   latitude: number;
   longitude: number;
-  point: number;
+  coin: number;
 }
 
 export async function getMyInfo(): Promise<MemberInfo> {
