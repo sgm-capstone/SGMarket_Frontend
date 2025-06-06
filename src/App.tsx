@@ -28,6 +28,7 @@ import RegisterComplete from "./pages/singup/RegisterComplete";
 import ChargeCoin from "./pages/chargeCoin";
 import EditProfilePage from "./pages/myPage/EditProfilePage";
 import CoinChargeSuccess from "./pages/CoinChargeSuccess";
+import { useSSEPolyfill } from "./hooks/useSSE";
 
 export default function App() {
   const setAccessToken = useAuthStore((s) => s.setAccessToken);
@@ -44,6 +45,7 @@ export default function App() {
           "/auth/access-token"
         );
         setAccessToken(data.accessToken);
+        console.log("실제" + data.accessToken);
         login();
 
         const member = await getMyInfo();
@@ -61,6 +63,8 @@ export default function App() {
       }
     })();
   }, []);
+
+  useSSEPolyfill();
 
   if (checkingAuth) {
     return <OpenApp />;

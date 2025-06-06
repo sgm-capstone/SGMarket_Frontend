@@ -1,6 +1,8 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { matchPath, Outlet, useLocation } from "react-router-dom";
 import BottomNav from "../components/BottomNav";
+import { useSSEPolyfill } from "../hooks/useSSE";
+import ToastStack from "../components/ToastStack";
 
 function Layout() {
   const location = useLocation();
@@ -23,14 +25,18 @@ function Layout() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div
-      ref={scrollContainerRef}
-      className="relative border border-black max-w-[760px] min-w-[320px] w-full h-screen mx-auto flex flex-col overflow-y-auto"
-    >
-      <div className="flex-1 flex justify-center w-full font-MapleLight">
-        <Outlet />
+    <div className="relative w-full h-screen mx-auto flex flex-col">
+      {/* ✔️ 토스트 스택은 레이아웃 맨 위에 */}
+      <ToastStack />
+      <div
+        ref={scrollContainerRef}
+        className="relative border border-black max-w-[760px] min-w-[320px] w-full h-screen mx-auto flex flex-col overflow-y-auto"
+      >
+        <div className="flex-1 flex justify-center w-full font-MapleLight">
+          <Outlet />
+        </div>
+        {renderBottmNav()}
       </div>
-      {renderBottmNav()}
     </div>
   );
 }
