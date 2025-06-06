@@ -1,6 +1,8 @@
 // src/hooks/usePortonePayment.ts
 import { useEffect } from "react";
 import axiosInstance from "../api/axios";
+import { useNavigate } from "react-router-dom";
+import { chargeCoin } from "./chargeCoin";
 
 declare global {
   interface Window {
@@ -17,6 +19,7 @@ export interface PaymentRequestData {
 }
 
 export function usePortonePayment() {
+  const navigate = useNavigate();
   useEffect(() => {
     if (typeof window.IMP !== "undefined") return;
     const script = document.createElement("script");
@@ -46,7 +49,6 @@ export function usePortonePayment() {
       },
       async (rsp: any) => {
         if (rsp.success) {
-          alert(`포트원 결제 성공: imp_uid=${rsp.imp_uid}`);
           console.log(rsp);
 
           const payload = {
@@ -57,9 +59,13 @@ export function usePortonePayment() {
             pay_method: rsp.pay_method,
             paid_at: rsp.paid_at,
           };
-          //   const res = axiosInstance.post("/payments/webhook/portone", payload);
-          //   console.log(res);
+          console.log(payload);
+
           try {
+            await chargeCoin(rsp.paid_amount);
+            navigate("/charge/success", {
+              state: { amount: payload.paid_amount },
+            });
           } catch (err) {
             console.error("❌ 서버 요청 중 오류 발생", err);
             alert("서버 검증 중 네트워크 오류가 발생했습니다.");
