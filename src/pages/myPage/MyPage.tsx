@@ -51,7 +51,7 @@ export default function MyPage() {
             <p className="font-bold text-lg">{member?.nickname}님</p>
             <p className="text-sm text-gray-400 flex items-center gap-1">
               보유 <img src={Logo} alt="로고" className="w-5 h-5 " />
-              <span className="ml-1">{member?.point || 0} 코인</span>
+              <span className="ml-1">{member?.coin || 0} 코인</span>
             </p>
           </div>
         </div>
