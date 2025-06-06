@@ -14,3 +14,17 @@ export interface ChatMessage {
   sender?: string | null;
   messageType?: "TALK" | "ENTER" | "LEAVE";
 }
+
+// src/types/toast.ts
+export interface ToastItem {
+  /** 내부에서 Date.now() 로 채워집니다 */
+  id: number;
+  /** 🎯 제목(1줄) */
+  title: string;
+  /** 부제(선택) */
+  message?: string;
+  /** 우측 작은 버튼 라벨(선택) */
+  actionLabel?: string;
+  /** 버튼 클릭 시 실행(선택) */
+  onAction?: () => void;
+}
