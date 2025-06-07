@@ -6,12 +6,13 @@ import ChatMessageList from "../../components/chat/ChatMessageList";
 import useStomp from "../../hooks/useStomp";
 import { ChatMessage } from "../../types/types";
 import { useMemberStore } from "../../stores/memberStore";
-import { getChatMessages } from "../../api/chat";
+import { getPaginatedChatMessages } from "../../api/chat";
 
 export default function ChatPage() {
   const { roomId } = useParams();
   const [isSeller] = useState(true);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [cursor, setCursor] = useState<number | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [text, setText] = useState("");
@@ -20,13 +21,38 @@ export default function ChatPage() {
   const userId = useMemberStore((s) => s.member?.id);
   const senderNickname = useMemberStore((s) => s.member?.nickname);
 
-  const fetchMessages = async (before?: string) => {
-    if (!roomId || isLoading || !userId) return;
+  const fetchMessages = async () => {
+    if (!roomId || isLoading || !userId || !hasMore) return;
     setIsLoading(true);
     try {
-      const newMessages = await getChatMessages(roomId, 30, before, userId);
-      setMessages((prev) => [...newMessages, ...prev]);
-      if (newMessages.length === 0) setHasMore(false);
+      const res = await getPaginatedChatMessages(
+        roomId,
+        cursor ?? undefined,
+        30
+      );
+      const fetchedMessages = res.messages.map(
+        (msg: any, index: number): ChatMessage => {
+          const isMine = String(msg.senderId) === String(userId);
+          const uiType: "my" | "opponent" | "system" =
+            msg.type === "TALK" ? (isMine ? "my" : "opponent") : "system";
+
+          return {
+            id: Date.now() + index,
+            text: msg.message,
+            type: uiType,
+            timestamp: msg.createdAt,
+            senderId: msg.senderId,
+            createdAt: msg.createdAt,
+            roomId: msg.roomId,
+            sender: msg.sender,
+            messageType: msg.type,
+          };
+        }
+      );
+
+      setMessages((prev) => [...fetchedMessages, ...prev]);
+      setCursor(res.nextCursor);
+      setHasMore(res.hasMore);
     } catch (err) {
       console.error("💥 메시지 더 불러오기 실패", err);
     } finally {
@@ -35,28 +61,23 @@ export default function ChatPage() {
   };
 
   useEffect(() => {
+    setMessages([]);
+    setCursor(null);
+    setHasMore(true);
     fetchMessages();
   }, [roomId]);
 
   useEffect(() => {
     const container = chatContainerRef.current;
     if (!container) return;
-    const isNearBottom =
-      container.scrollHeight - container.scrollTop - container.clientHeight <
-      100;
-    if (isNearBottom) {
-      container.scrollTop = container.scrollHeight;
-    }
+    container.scrollTop = container.scrollHeight;
   }, [messages]);
 
   const handleScroll = () => {
     const container = chatContainerRef.current;
     if (!container || isLoading || !hasMore) return;
     if (container.scrollTop < 80) {
-      const oldest = messages[0];
-      if (oldest?.createdAt) {
-        fetchMessages(oldest.createdAt);
-      }
+      fetchMessages();
     }
   };
 
@@ -92,11 +113,14 @@ export default function ChatPage() {
   const handleSend = () => {
     if (!text.trim() || !userId || !roomId) return;
 
+    const now = new Date().toISOString();
+
     const newMsg: ChatMessage = {
       id: Date.now(),
       type: "my",
       text,
-      timestamp: new Date().toISOString(),
+      timestamp: now,
+      createdAt: now,
       senderId: userId,
       messageType: "TALK",
     };

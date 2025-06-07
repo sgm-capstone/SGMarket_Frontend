@@ -73,3 +73,19 @@ export async function getChatMessages(
     };
   });
 }
+// 채팅 조회 (페이징)
+export const getPaginatedChatMessages = async (
+  roomId: string,
+  cursor?: number,
+  size: number = 30
+) => {
+  const res = await axiosInstance.get(`/chat/room/${roomId}/messages-page`, {
+    params: { cursor, size },
+  });
+  return res.data.data;
+};
+
+// 채팅방 삭제
+export async function deleteChatRoom(roomId: string): Promise<void> {
+  await axiosInstance.delete(`/chat/room/${roomId}`);
+}
