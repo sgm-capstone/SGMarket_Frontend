@@ -6,14 +6,19 @@ import {
   FaBars,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { useMemberStore } from "../stores/memberStore";
 
 const BottomNav = () => {
   const navigate = useNavigate();
-
+  const member = useMemberStore((state) => state.member);
   const navItems = [
     { icon: <FaHome size={24} />, label: "홈", path: "/home" },
     { icon: <FaThumbsUp size={24} />, label: "랜덤경매", path: "/random" },
-    { icon: <FaChartLine size={24} />, label: "My경매", path: "/my" },
+    {
+      icon: <FaChartLine size={24} />,
+      label: "My경매",
+      path: `/profile/${member?.id}`,
+    },
     { icon: <FaComments size={24} />, label: "채팅", path: "/chat" },
     { icon: <FaBars size={24} />, label: "메뉴", path: "/mypage" },
   ];
