@@ -3,6 +3,7 @@ import { FaChevronLeft } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { getRandomAuction } from "../api/auction";
 import type { RandomAuction as AuctionData } from "../api/auction";
+import { categoryLabelMapping } from "../constants/categoryMap";
 
 export default function RandomAuction() {
   const navigate = useNavigate();
@@ -76,7 +77,8 @@ export default function RandomAuction() {
         </div>
 
         <span className="text-sm text-gray-400 inline-block bg-gray-800 px-2 py-1 rounded mt-4">
-          {auction.auctionCategory}
+          {categoryLabelMapping[auction.auctionCategory] ||
+            auction.auctionCategory}
         </span>
       </div>
     </div>
