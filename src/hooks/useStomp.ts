@@ -1,4 +1,3 @@
-// hooks/useStomp.ts
 import { useEffect, useRef } from "react";
 import { Client } from "@stomp/stompjs";
 
@@ -8,7 +7,13 @@ export default function useStomp(
 ) {
   const clientRef = useRef<Client | null>(null);
   const WS_URL = import.meta.env.VITE_WS_URL;
+
   useEffect(() => {
+    if (clientRef.current?.connected) {
+      console.warn("🟡 이미 연결된 WebSocket이 있음");
+      clientRef.current.deactivate();
+    }
+
     const client = new Client({
       brokerURL: WS_URL,
       reconnectDelay: 5000,
@@ -20,9 +25,11 @@ export default function useStomp(
           onMessage(msg);
         });
       },
-
       onStompError: (frame) => {
         console.error("🔴 STOMP 에러:", frame.headers["message"]);
+      },
+      onDisconnect: () => {
+        console.log("🧹 STOMP 연결 종료됨");
       },
     });
 
@@ -30,7 +37,9 @@ export default function useStomp(
     clientRef.current = client;
 
     return () => {
+      console.log("🧹 cleanup: WebSocket 종료 요청");
       client.deactivate();
+      clientRef.current = null;
     };
   }, [roomId]);
 
