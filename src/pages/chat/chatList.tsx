@@ -14,7 +14,16 @@ export default function ChatList() {
   const fetchChats = async () => {
     try {
       const data = await getMyDirectChats();
-      setChats(data);
+      const sorted = data.sort((a, b) => {
+        const timeA = a.lastMessageTime
+          ? new Date(a.lastMessageTime).getTime()
+          : 0;
+        const timeB = b.lastMessageTime
+          ? new Date(b.lastMessageTime).getTime()
+          : 0;
+        return timeB - timeA;
+      });
+      setChats(sorted);
     } catch (e) {
       console.error("채팅 목록 조회 실패", e);
     }

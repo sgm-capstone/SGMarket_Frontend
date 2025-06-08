@@ -1,4 +1,3 @@
-// src/components/productForm/ProductForm.tsx
 import { useState, useEffect, FormEvent } from "react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { FaChevronLeft } from "react-icons/fa";
@@ -14,7 +13,7 @@ import dayjs from "dayjs";
 import "react-datepicker/dist/react-datepicker.css";
 import "../../css/style/DatePickerDark.css";
 import { isAxiosError } from "axios";
-import type { CategoryLabel } from "../../types/category";
+import { categoryToCodeMap, type CategoryLabel } from "../../types/category";
 
 const categoryList: CategoryLabel[] = [
   "디지털기기",
@@ -28,7 +27,7 @@ const categoryList: CategoryLabel[] = [
   "남성패션/잡화",
   "뷰티/미용",
   "스포츠/레저",
-  "취미/게임/음반",
+  "취미",
 ];
 
 export default function ProductForm() {
@@ -42,7 +41,7 @@ export default function ProductForm() {
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState<CategoryLabel | "">("");
   const [file, setFile] = useState<File | null>(null);
-  const [auctionImageUrl, setAuctionImageUrl] = useState(""); // 기존 이미지 경로
+  const [auctionImageUrl, setAuctionImageUrl] = useState("");
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [productName, setProductName] = useState("");
   const [showCategorySelect, setShowCategorySelect] = useState(false);
@@ -56,7 +55,11 @@ export default function ProductForm() {
           setTitle(data.auctionTitle);
           setDescription(data.auctionDescription);
           setPrice(data.auctionStartPrice.toString());
-          setCategory(data.auctionCategory as CategoryLabel);
+
+          const label = Object.entries(categoryToCodeMap).find(
+            ([, code]) => code === data.auctionCategory
+          )?.[0] as CategoryLabel;
+          setCategory(label);
           setProductName(data.auctionItem.itemName);
           setEndDate(new Date(data.auctionEndDate));
           setAuctionImageUrl(data.auctionImageUrl);
@@ -87,6 +90,7 @@ export default function ProductForm() {
     if (!productName || !endDate) return alert("모든 값을 입력해주세요");
 
     const formattedEndDate = dayjs(endDate).format("YYYY-MM-DD HH:mm:ss");
+    const mappedCategory = categoryToCodeMap[category as CategoryLabel];
 
     try {
       if (isEditMode && auctionId) {
@@ -95,7 +99,7 @@ export default function ProductForm() {
           description,
           itemName: productName,
           endDate: formattedEndDate,
-          auctionCategory: category,
+          auctionCategory: mappedCategory,
         };
         await patchAuction(Number(auctionId), payload, file || null);
         alert("경매 수정 완료!");
@@ -107,7 +111,7 @@ export default function ProductForm() {
           description,
           endDate: formattedEndDate,
           startPrice: parseInt(price, 10),
-          auctionCategory: category,
+          auctionCategory: mappedCategory,
         };
         await postAuction(payload, file);
         alert("경매 등록 완료!");
@@ -142,14 +146,10 @@ export default function ProductForm() {
                 onChange={(e) => {
                   const selectedFile = e.target.files?.[0] || null;
                   setFile(selectedFile);
-                  if (selectedFile) {
-                    // 새 파일을 선택하면 기존 URL 제거
-                    setAuctionImageUrl("");
-                  }
+                  if (selectedFile) setAuctionImageUrl("");
                 }}
                 className="absolute inset-0 opacity-0 cursor-pointer"
               />
-
               {file ? (
                 <img
                   src={URL.createObjectURL(file)}
