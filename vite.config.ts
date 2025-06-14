@@ -9,6 +9,9 @@ export default defineConfig({
       devOptions: {
         enabled: true, // 개발 환경에서도 PWA 활성화
       },
+      workbox: {
+        cleanupOutdatedCaches: true, // ← 이거 꼭 넣어야 오래된 빌드 제거됨
+      },
       manifest: {
         name: "Sgmarket",
         short_name: "SGM",
@@ -31,6 +34,7 @@ export default defineConfig({
       },
     }),
   ],
+
   define: {
     global: {},
   },

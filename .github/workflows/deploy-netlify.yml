@@ -23,6 +23,13 @@ jobs:
         run: yarn vite build
         env:
           VITE_PUBLIC_URL: ${{ secrets.VITE_PUBLIC_URL }}
+          VITE_KAKAO_CLIENT_ID: ${{ secrets.VITE_KAKAO_CLIENT_ID }}
+          VITE_KAKAO_REDIRECT_URI: ${{ secrets.VITE_KAKAO_REDIRECT_URI }}
+          VITE_KAKAO_REST_API_KEY: ${{ secrets.VITE_KAKAO_REST_API_KEY }}
+          VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
+          VITE_GOOGLE_REDIRECT_URI: ${{ secrets.VITE_GOOGLE_REDIRECT_URI }}
+          VITE_PORTONE_INIT: ${{ secrets.VITE_PORTONE_INIT }}
+          VITE_WS_URL: ${{ secrets.VITE_WS_URL }}
 
       - name: Deploy to Netlify
         uses: nwtgck/actions-netlify@v2.0
