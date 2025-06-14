@@ -90,7 +90,6 @@ export default function ProductForm() {
     if (!productName || !endDate) return alert("모든 값을 입력해주세요");
 
     const formattedEndDate = dayjs(endDate).format("YYYY-MM-DD HH:mm:ss");
-    const mappedCategory = categoryToCodeMap[category as CategoryLabel];
 
     try {
       if (isEditMode && auctionId) {
