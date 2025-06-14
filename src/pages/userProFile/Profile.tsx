@@ -1,26 +1,72 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { AuctionItem } from "../../api/auction";
-import { getAuctionsByMemberId } from "../../api/member";
+import { getAuctionsByMemberId, getOrdersByMemberId } from "../../api/member";
 
 export default function ProfilePage() {
   const navigate = useNavigate();
   const { memberId } = useParams();
   const [auctions, setAuctions] = useState<AuctionItem[]>([]);
+  const [orders, setOrders] = useState<AuctionItem[]>([]);
 
+  const [auctionPage, setAuctionPage] = useState(0);
+  const [orderPage, setOrderPage] = useState(0);
+  const [hasMoreAuctions, setHasMoreAuctions] = useState(true);
+  const [hasMoreOrders, setHasMoreOrders] = useState(true);
+
+  const auctionEndRef = useRef<HTMLDivElement | null>(null);
+  const orderEndRef = useRef<HTMLDivElement | null>(null);
+
+  // 판매 물품 호출
   useEffect(() => {
-    async function fetchData() {
-      if (!memberId) return;
-      try {
-        const res = await getAuctionsByMemberId(Number(memberId));
-        setAuctions(res.content);
-      } catch (err) {
-        console.error("🔴 경매 목록 불러오기 실패:", err);
-      }
-    }
-    fetchData();
-  }, [memberId]);
+    if (!memberId) return;
+    const fetch = async () => {
+      const res = await getAuctionsByMemberId(Number(memberId), auctionPage);
+      setAuctions((prev) => [...prev, ...res.content]);
+      setHasMoreAuctions(!res.last);
+    };
+    fetch();
+  }, [auctionPage, memberId]);
+
+  // 구매 물품 호출
+  useEffect(() => {
+    if (!memberId) return;
+    const fetch = async () => {
+      const res = await getOrdersByMemberId(Number(memberId), orderPage);
+      setOrders((prev) => [...prev, ...res.content]);
+      setHasMoreOrders(!res.last);
+    };
+    fetch();
+  }, [orderPage, memberId]);
+
+  // 무한스크롤 (판매)
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && hasMoreAuctions) {
+          setAuctionPage((prev) => prev + 1);
+        }
+      },
+      { threshold: 1 }
+    );
+    if (auctionEndRef.current) observer.observe(auctionEndRef.current);
+    return () => observer.disconnect();
+  }, [auctions, hasMoreAuctions]);
+
+  // 무한스크롤 (구매)
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && hasMoreOrders) {
+          setOrderPage((prev) => prev + 1);
+        }
+      },
+      { threshold: 1 }
+    );
+    if (orderEndRef.current) observer.observe(orderEndRef.current);
+    return () => observer.disconnect();
+  }, [orders, hasMoreOrders]);
 
   return (
     <div className="bg-[#101010] text-white min-h-screen pb-20 w-full max-w-[760px] mx-auto">
@@ -64,16 +110,12 @@ export default function ProfilePage() {
       )}
 
       {/* 판매 물품 */}
-      <div className="px-4 mt-6">
+      <section className="px-4 mt-6">
         <div className="flex justify-between items-center mb-3">
-          <p className="text-[14px] font-bold">
-            {auctions[0]?.auctionMember.memberName} 님의{" "}
-            <span className="text-white">판매 물품 보기</span>
-          </p>
+          <p className="text-[14px] font-bold">판매 물품 보기</p>
           <FaChevronRight className="text-white text-sm" />
         </div>
-
-        <div className="grid grid-cols-2 gap-4 overflow-y-auto max-h-[380px]">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 overflow-y-auto max-h-[380px]">
           {auctions.map((item) => (
             <div
               key={item.auctionId}
@@ -83,7 +125,7 @@ export default function ProfilePage() {
               <img
                 src={item.auctionImageUrl}
                 alt={item.auctionTitle}
-                className="w-full h-32 object-contain bg-white"
+                className="w-full h-28 sm:h-32 md:h-36 object-contain bg-white"
               />
               <div className="p-2">
                 <p className="text-[13px] font-bold truncate">
@@ -98,7 +140,42 @@ export default function ProfilePage() {
             </div>
           ))}
         </div>
-      </div>
+        <div ref={auctionEndRef} className="h-4" />
+      </section>
+
+      {/* 구매 목록 */}
+      <section className="px-4 mt-8">
+        <div className="flex justify-between items-center mb-3">
+          <p className="text-[14px] font-bold">구매한 물품 보기</p>
+          <FaChevronRight className="text-white text-sm" />
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 overflow-y-auto max-h-[380px]">
+          {orders.map((item) => (
+            <div
+              key={item.auctionId}
+              className="bg-[#181818] rounded-lg overflow-hidden cursor-pointer"
+              onClick={() => navigate(`/auction/${item.auctionId}`)}
+            >
+              <img
+                src={item.auctionImageUrl}
+                alt={item.auctionTitle}
+                className="w-full h-28 sm:h-32 md:h-36 object-contain bg-white"
+              />
+              <div className="p-2">
+                <p className="text-[13px] font-bold truncate">
+                  {item.auctionTitle}
+                </p>
+                <p className="text-xs text-white">
+                  {item.auctionCurrentPrice > 0
+                    ? `${item.auctionCurrentPrice.toLocaleString()}원`
+                    : `${item.auctionStartPrice.toLocaleString()}원`}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div ref={orderEndRef} className="h-4" />
+      </section>
     </div>
   );
 }

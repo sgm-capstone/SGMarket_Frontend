@@ -88,3 +88,44 @@ export async function getAuctionsByMemberId(
     last: boolean;
   };
 }
+export interface OrderItem {
+  itemId: number;
+  quantity: number;
+  price: number;
+}
+
+export interface Order {
+  id: number;
+  memberId: number;
+  orderItems: OrderItem[];
+  orderUid: string;
+  status: string;
+  orderDate: string;
+}
+
+export interface PaginatedOrderResponse {
+  content: Order[];
+  page: number;
+  size: number;
+  hasNext: boolean;
+  first: boolean;
+  last: boolean;
+}
+
+export async function getOrdersByMemberId(
+  memberId: number,
+  page = 0,
+  size = 20
+): Promise<{
+  content: AuctionItem[];
+  page: number;
+  size: number;
+  hasNext: boolean;
+  first: boolean;
+  last: boolean;
+}> {
+  const res = await axiosInstance.get(
+    `/members/${memberId}/orders?page=${page}&size=${size}`
+  );
+  return res.data.data;
+}
