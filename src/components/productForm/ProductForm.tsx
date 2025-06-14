@@ -99,7 +99,7 @@ export default function ProductForm() {
           description,
           itemName: productName,
           endDate: formattedEndDate,
-          auctionCategory: mappedCategory,
+          auctionCategory: category as CategoryLabel,
         };
         await patchAuction(Number(auctionId), payload, file || null);
         alert("경매 수정 완료!");
@@ -111,7 +111,7 @@ export default function ProductForm() {
           description,
           endDate: formattedEndDate,
           startPrice: parseInt(price, 10),
-          auctionCategory: mappedCategory,
+          auctionCategory: category as CategoryLabel,
         };
         await postAuction(payload, file);
         alert("경매 등록 완료!");
