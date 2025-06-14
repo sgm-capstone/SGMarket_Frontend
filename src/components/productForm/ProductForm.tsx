@@ -90,7 +90,6 @@ export default function ProductForm() {
     if (!productName || !endDate) return alert("모든 값을 입력해주세요");
 
     const formattedEndDate = dayjs(endDate).format("YYYY-MM-DD HH:mm:ss");
-    const mappedCategory = categoryToCodeMap[category as CategoryLabel];
 
     try {
       if (isEditMode && auctionId) {
@@ -99,7 +98,7 @@ export default function ProductForm() {
           description,
           itemName: productName,
           endDate: formattedEndDate,
-          auctionCategory: mappedCategory,
+          auctionCategory: category as CategoryLabel,
         };
         await patchAuction(Number(auctionId), payload, file || null);
         alert("경매 수정 완료!");
@@ -111,7 +110,7 @@ export default function ProductForm() {
           description,
           endDate: formattedEndDate,
           startPrice: parseInt(price, 10),
-          auctionCategory: mappedCategory,
+          auctionCategory: category as CategoryLabel,
         };
         await postAuction(payload, file);
         alert("경매 등록 완료!");

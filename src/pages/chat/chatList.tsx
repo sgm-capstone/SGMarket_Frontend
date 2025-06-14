@@ -6,6 +6,7 @@ import {
   getMyDirectChats,
   deleteChatRoom,
 } from "../../api/chat";
+import { getMainRegion } from "../../utils/getMainRegion";
 
 export default function ChatList() {
   const navigate = useNavigate();
@@ -86,7 +87,9 @@ export default function ChatList() {
                 <p className="text-sm text-gray-400 truncate">
                   {chat.lastMessage || "최근 메시지 없음"}
                 </p>
-                <span className="text-xs text-gray-400">석수1동</span>
+                <span className="text-xs text-gray-400">
+                  {chat.locationName ? getMainRegion(chat.locationName) : ""}
+                </span>
               </div>
             </div>
 
