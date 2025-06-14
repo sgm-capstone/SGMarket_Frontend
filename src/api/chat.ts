@@ -26,6 +26,7 @@ export async function createDirectChat(
 
 // DM 목록 조회
 export interface DirectChatRoom {
+  locationName: string;
   roomId: string;
   otherUserId: number;
   otherUserNickname: string;
@@ -41,48 +42,50 @@ export async function getMyDirectChats(): Promise<DirectChatRoom[]> {
   return res.data.data;
 }
 
-// 채팅 조회
-export async function getChatMessages(
-  roomId: string,
-  count = 50,
-  before?: string,
-  currentUserId?: number
-): Promise<ChatMessage[]> {
-  const res = await axiosInstance.get(`/chat/room/${roomId}/messages`, {
-    params: {
-      count,
-      ...(before ? { before } : {}),
-    },
-  });
-
-  return res.data.data.map((msg: any, index: number) => {
-    const isMine = String(msg.senderId) === String(currentUserId);
-    const uiType: "my" | "opponent" | "system" =
-      msg.type === "TALK" ? (isMine ? "my" : "opponent") : "system";
-
-    return {
-      id: Date.now() + index,
-      text: msg.message,
-      type: uiType,
-      timestamp: msg.createdAt,
-      senderId: msg.senderId,
-      createdAt: msg.createdAt,
-      roomId: msg.roomId,
-      sender: msg.sender,
-      messageType: msg.type,
-    };
-  });
-}
 // 채팅 조회 (페이징)
 export const getPaginatedChatMessages = async (
   roomId: string,
   cursor?: number,
   size: number = 30
-) => {
+): Promise<{
+  messages: ChatMessage[];
+  nextCursor: number | null;
+  hasMore: boolean;
+}> => {
   const res = await axiosInstance.get(`/chat/room/${roomId}/messages-page`, {
     params: { cursor, size },
   });
-  return res.data.data;
+
+  const { messages, nextCursor, hasMore } = res.data.data;
+
+  const parsedMessages: ChatMessage[] = messages.map(
+    (msg: any, index: number) => {
+      const isMine =
+        String(msg.senderId) === String(localStorage.getItem("userId") ?? "");
+
+      const uiType: "my" | "opponent" | "system" =
+        msg.type === "TALK" ? (isMine ? "my" : "opponent") : "system";
+
+      return {
+        id: Date.now() + index,
+        text: msg.message,
+        type: uiType,
+        timestamp: msg.createdAt,
+        senderId: msg.senderId,
+        createdAt: msg.createdAt,
+        roomId: msg.roomId,
+        sender: msg.sender,
+        messageType: msg.type,
+        profileImage: msg.profileImage ?? "",
+      };
+    }
+  );
+
+  return {
+    messages: parsedMessages,
+    nextCursor,
+    hasMore,
+  };
 };
 
 // 채팅방 삭제

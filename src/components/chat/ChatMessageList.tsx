@@ -30,7 +30,11 @@ export default function ChatMessageList({ messages }: Props) {
               <MyMessage text={msg.text} timestamp={msg.timestamp} />
             )}
             {msg.type === "opponent" && (
-              <OpponentMessage text={msg.text} timestamp={msg.timestamp} />
+              <OpponentMessage
+                text={msg.text}
+                timestamp={msg.timestamp}
+                profileImage={msg.profileImage ?? undefined}
+              />
             )}
             {msg.type === "system" && <SystemMessage text={msg.text} />}
           </div>

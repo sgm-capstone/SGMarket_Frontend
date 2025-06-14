@@ -13,6 +13,7 @@ export interface ChatMessage {
   roomId?: string;
   sender?: string | null;
   messageType?: "TALK" | "ENTER" | "LEAVE";
+  profileImage?: string | null;
 }
 
 // src/types/toast.ts

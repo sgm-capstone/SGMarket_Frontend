@@ -23,6 +23,10 @@ export default function ChatPage() {
 
   const fetchMessages = async () => {
     if (!roomId || isLoading || !userId || !hasMore) return;
+
+    const container = chatContainerRef.current;
+    const prevScrollHeight = container?.scrollHeight ?? 0;
+
     setIsLoading(true);
     try {
       const res = await getPaginatedChatMessages(
@@ -30,29 +34,23 @@ export default function ChatPage() {
         cursor ?? undefined,
         30
       );
-      const fetchedMessages = res.messages.map(
-        (msg: any, index: number): ChatMessage => {
-          const isMine = String(msg.senderId) === String(userId);
-          const uiType: "my" | "opponent" | "system" =
-            msg.type === "TALK" ? (isMine ? "my" : "opponent") : "system";
-
-          return {
-            id: Date.now() + index,
-            text: msg.message,
-            type: uiType,
-            timestamp: msg.createdAt,
-            senderId: msg.senderId,
-            createdAt: msg.createdAt,
-            roomId: msg.roomId,
-            sender: msg.sender,
-            messageType: msg.type,
-          };
-        }
-      );
+      const fetchedMessages = res.messages.map((msg, _): ChatMessage => {
+        const isMine = String(msg.senderId) === String(userId);
+        const uiType: "my" | "opponent" | "system" =
+          msg.messageType === "TALK" ? (isMine ? "my" : "opponent") : "system";
+        return { ...msg, type: uiType };
+      });
 
       setMessages((prev) => [...fetchedMessages, ...prev]);
       setCursor(res.nextCursor);
       setHasMore(res.hasMore);
+
+      setTimeout(() => {
+        if (container) {
+          const newScrollHeight = container.scrollHeight;
+          container.scrollTop = newScrollHeight - prevScrollHeight;
+        }
+      }, 0);
     } catch (err) {
       console.error("💥 메시지 더 불러오기 실패", err);
     } finally {
@@ -66,12 +64,6 @@ export default function ChatPage() {
     setHasMore(true);
     fetchMessages();
   }, [roomId]);
-
-  useEffect(() => {
-    const container = chatContainerRef.current;
-    if (!container) return;
-    container.scrollTop = container.scrollHeight;
-  }, [messages]);
 
   const handleScroll = () => {
     const container = chatContainerRef.current;
@@ -104,8 +96,16 @@ export default function ChatPage() {
         roomId: msg.roomId,
         sender: msg.sender,
         messageType: msg.type,
+        profileImage: msg.profileImage ?? "",
       },
     ]);
+
+    setTimeout(() => {
+      const container = chatContainerRef.current;
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+      }
+    }, 0);
   };
 
   const { sendMessage } = useStomp(roomId!, handleIncomingMessage);
@@ -114,7 +114,6 @@ export default function ChatPage() {
     if (!text.trim() || !userId || !roomId) return;
 
     const now = new Date().toISOString();
-
     const newMsg: ChatMessage = {
       id: Date.now(),
       type: "my",
@@ -136,6 +135,13 @@ export default function ChatPage() {
     });
 
     setText("");
+
+    setTimeout(() => {
+      const container = chatContainerRef.current;
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+      }
+    }, 0);
   };
 
   return (
