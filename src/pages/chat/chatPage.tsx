@@ -1,16 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import ChatSellerHeader from "../../components/chat/ChatSellerHeader";
-import ChatBuyerHeader from "../../components/chat/ChatBuyerHeader";
 import ChatMessageList from "../../components/chat/ChatMessageList";
 import useStomp from "../../hooks/useStomp";
 import { ChatMessage } from "../../types/types";
 import { useMemberStore } from "../../stores/memberStore";
 import { getPaginatedChatMessages } from "../../api/chat";
+import ChatHeader from "../../components/chat/ChatHeader";
 
 export default function ChatPage() {
   const { roomId } = useParams();
-  const [isSeller] = useState(true);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [cursor, setCursor] = useState<number | null>(null);
   const [hasMore, setHasMore] = useState(true);
@@ -146,7 +144,7 @@ export default function ChatPage() {
 
   return (
     <div className="w-full max-w-[760px] h-screen mx-auto bg-[#101010] text-white flex flex-col">
-      {isSeller ? <ChatSellerHeader /> : <ChatBuyerHeader />}
+      <ChatHeader />
 
       <div className="bg-gray-700 text-sm px-4 py-3 text-white mt-3 mx-4 rounded-md">
         <p className="font-bold mb-1">

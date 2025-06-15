@@ -92,3 +92,17 @@ export const getPaginatedChatMessages = async (
 export async function deleteChatRoom(roomId: string): Promise<void> {
   await axiosInstance.delete(`/chat/room/${roomId}`);
 }
+
+// 채팅방 메타데이터 조회
+export interface ChatRoomMeta {
+  itemId: number;
+  itemTitle: string;
+  itemPrice: number;
+  otherUserNickname: string;
+  otherUserProfileImage: string;
+}
+
+export async function getChatRoomMeta(roomId: string): Promise<ChatRoomMeta> {
+  const res = await axiosInstance.get(`/chat/room/${roomId}/meta`);
+  return res.data.data;
+}
