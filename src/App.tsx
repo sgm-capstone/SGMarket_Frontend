@@ -29,6 +29,7 @@ import ChargeCoin from "./pages/chargeCoin";
 import EditProfilePage from "./pages/myPage/EditProfilePage";
 import CoinChargeSuccess from "./pages/CoinChargeSuccess";
 import { useSSEPolyfill } from "./hooks/useSSE";
+import RedirectByAuth from "./routes/RedirectByAuth";
 
 export default function App() {
   const setAccessToken = useAuthStore((s) => s.setAccessToken);
@@ -49,10 +50,10 @@ export default function App() {
         login();
 
         const member = await getMyInfo();
-        useMemberStore.getState().setMember(member); // ✅ 멤버 정보 저장
+        useMemberStore.getState().setMember(member);
       } catch (err: any) {
         if (err.message === "NEED_REGISTER") {
-          navigate("/register"); // ✅ 회원가입 페이지로 이동
+          navigate("/register");
           return;
         }
 
@@ -72,6 +73,8 @@ export default function App() {
 
   return (
     <Routes>
+      <Route path="/" element={<RedirectByAuth />} />
+
       <Route path="/" element={<Layout />}>
         <Route element={<PublicRoute />}>
           <Route path="login" element={<LoginPage />} />
@@ -95,7 +98,6 @@ export default function App() {
           <Route path="myPage/bid" element={<MyBidListPage />} />
           <Route path="mypage/edit/:memberId" element={<EditProfilePage />} />
           <Route path="profile/:memberId" element={<ProfilePage />} />
-
           <Route path="charge" element={<ChargeCoin />} />
           <Route path="charge/success" element={<CoinChargeSuccess />} />
         </Route>
