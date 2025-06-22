@@ -56,7 +56,7 @@ export default function App() {
 
         useMemberStore.getState().setMember(member);
       } catch (err: any) {
-        if (err.response?.status === 500) {
+        if (err.response?.status === 404) {
           navigate("/register");
           return;
         }
