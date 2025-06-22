@@ -54,14 +54,15 @@ export default function App() {
         }
 
         useMemberStore.getState().setMember(member);
-        setCheckingAuth(false);
       } catch (err: any) {
         navigate("/register");
         return;
+      } finally {
+        useAuthStore.getState().setAuthChecked(true); // ✅ 인증 흐름 종료됨
+        setCheckingAuth(false);
       }
     })();
   }, []);
-
   useSSEPolyfill();
 
   if (checkingAuth) {
