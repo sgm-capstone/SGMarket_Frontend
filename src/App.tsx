@@ -58,7 +58,7 @@ export default function App() {
         navigate("/register");
         return;
       } finally {
-        useAuthStore.getState().setAuthChecked(true); // ✅ 인증 흐름 종료됨
+        useAuthStore.getState().setAuthChecked(true);
         setCheckingAuth(false);
       }
     })();
