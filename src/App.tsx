@@ -34,7 +34,6 @@ import RedirectByAuth from "./routes/RedirectByAuth";
 export default function App() {
   const setAccessToken = useAuthStore((s) => s.setAccessToken);
   const login = useAuthStore((s) => s.login);
-  const logout = useAuthStore((s) => s.logout);
 
   const [checkingAuth, setCheckingAuth] = useState(true);
   const navigate = useNavigate();
@@ -61,9 +60,6 @@ export default function App() {
           navigate("/register");
           return;
         }
-
-        logout();
-        useMemberStore.getState().clearMember();
       } finally {
         setCheckingAuth(false);
       }
