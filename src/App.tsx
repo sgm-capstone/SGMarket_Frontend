@@ -54,11 +54,10 @@ export default function App() {
         }
 
         useMemberStore.getState().setMember(member);
+        setCheckingAuth(false);
       } catch (err: any) {
         navigate("/register");
         return;
-      } finally {
-        setCheckingAuth(false);
       }
     })();
   }, []);
