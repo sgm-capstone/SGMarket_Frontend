@@ -20,7 +20,18 @@ const PAGE_SIZE = 10;
 export default function Home() {
   const member = useMemberStore((state) => state.member);
 
+  const navigate = useNavigate();
   const [currentRegion, setCurrentRegion] = useState("로딩 중...");
+
+  useEffect(() => {
+    if (!member || !member.id) {
+      navigate("/register", { replace: true });
+    }
+  }, [member]);
+
+  if (!member || !member.id) {
+    return null;
+  }
 
   useEffect(() => {
     if (member?.address) {
@@ -36,8 +47,6 @@ export default function Home() {
   const [page, setPage] = useState(0);
   const [hasNextPage, setHasNextPage] = useState(true);
   const [isNextPageLoading, setIsNextPageLoading] = useState(false);
-
-  const navigate = useNavigate();
 
   useEffect(() => {
     setProducts([]);

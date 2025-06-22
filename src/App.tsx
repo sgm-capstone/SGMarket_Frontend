@@ -49,13 +49,13 @@ export default function App() {
         const member = await getMyInfo();
 
         if (!member || !member.id) {
-          navigate("/register");
+          navigate("/register", { replace: true });
           return;
         }
 
         useMemberStore.getState().setMember(member);
       } catch (err: any) {
-        navigate("/register");
+        navigate("/register", { replace: true });
         return;
       } finally {
         useAuthStore.getState().setAuthChecked(true);
