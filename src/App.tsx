@@ -37,7 +37,6 @@ export default function App() {
 
   const [checkingAuth, setCheckingAuth] = useState(true);
   const navigate = useNavigate();
-
   useEffect(() => {
     (async () => {
       try {
@@ -56,10 +55,8 @@ export default function App() {
 
         useMemberStore.getState().setMember(member);
       } catch (err: any) {
-        if (err.response?.status === 404) {
-          navigate("/register");
-          return;
-        }
+        navigate("/register");
+        return;
       } finally {
         setCheckingAuth(false);
       }
