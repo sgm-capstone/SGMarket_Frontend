@@ -19,8 +19,16 @@ const PAGE_SIZE = 10;
 
 export default function Home() {
   const member = useMemberStore((state) => state.member);
-  const fullAddress = member?.address || "주소 없음";
-  const [currentRegion] = useState(getMainRegion(fullAddress));
+
+  const [currentRegion, setCurrentRegion] = useState("로딩 중...");
+
+  useEffect(() => {
+    if (member?.address) {
+      const region = getMainRegion(member.address);
+      setCurrentRegion(region);
+    }
+  }, [member?.address]);
+
   const [selectedCategory, setSelectedCategory] =
     useState<CategoryLabel>("전체");
 
@@ -67,6 +75,7 @@ export default function Home() {
 
   return (
     <div className="w-full mx-auto bg-[#101012] text-white px-4 py-3 pb-[20px]">
+      {/* ✅ 현재 지역 표시 */}
       <TopHeader currentRegion={currentRegion} />
 
       {/* 카테고리 */}

@@ -46,13 +46,18 @@ export default function App() {
           "/auth/access-token"
         );
         setAccessToken(data.accessToken);
-        console.log("실제" + data.accessToken);
         login();
 
         const member = await getMyInfo();
+
+        if (!member || !member.id) {
+          navigate("/register");
+          return;
+        }
+
         useMemberStore.getState().setMember(member);
       } catch (err: any) {
-        if (err.message === "NEED_REGISTER") {
+        if (err.response?.status === 500) {
           navigate("/register");
           return;
         }
