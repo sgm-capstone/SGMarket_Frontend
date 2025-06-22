@@ -5,6 +5,7 @@ import { Coordinates } from "../../types/types";
 import axios from "axios";
 import axiosInstance from "../../api/axios";
 import { useNavigate } from "react-router-dom";
+import { useMemberStore } from "../../stores/memberStore";
 
 export default function RegisterUser() {
   const [name, setName] = useState("");
@@ -79,6 +80,9 @@ export default function RegisterUser() {
     try {
       const res = await axiosInstance.patch("/members", payload);
       console.log("✅ 회원 등록 성공", res.data);
+
+      useMemberStore.getState().setMember(res.data.data);
+
       navigate("/registerCom");
     } catch (err) {
       console.error("❌ 회원 등록 실패", err);
